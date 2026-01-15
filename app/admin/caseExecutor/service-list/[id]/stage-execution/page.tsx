@@ -1,0 +1,999 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { Button, Upload, Input, Space, message as antdMessage } from "antd";
+import { UploadOutlined, LikeOutlined, LockOutlined, BellOutlined, WarningOutlined } from "@ant-design/icons";
+import { useServiceStore } from "@/modules/mot/service/service.store";
+import http from "@/modules/utils/axios";
+import { IServiceStageExecution, StageStatus, ServiceStage, DocumentType, RiskLevel, IStageDocument } from "@/modules/mot/service/service.types";
+import { useRouter } from "next/navigation";
+import useAuthStore from "@/modules/auth/auth.store";
+import { Modal, Select } from "antd";
+
+
+
+
+const { TextArea } = Input;
+
+type Props = { params: { id: string } };
+
+export default function StageExecutionPage({ params }: Props) {
+  const serviceId = Number(params.id);
+  const router = useRouter();
+
+  const { 
+    currentService, 
+    getServiceById, 
+    getServiceStages, 
+    getAssignedServiceById, 
+    updateStageStatus, 
+    uploadStageDocument, 
+    downloadStageDocument, 
+    setRiskLevel, 
+    addStageComment,
+    createStageTransport  } = useServiceStore();
+
+  const [stageFiles, setStageFiles] = useState<Record<number, File | null>>({});
+  const [stageComments, setStageComments] = useState<Record<number, string>>({});
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const [docsModalVisible, setDocsModalVisible] = useState(false);
+  const [selectedDocs, setSelectedDocs] = useState<IStageDocument[]>([]);
+  const [selectedStageTitle, setSelectedStageTitle] = useState("");
+
+
+
+
+  const [riskSelections, setRiskSelections] = useState<Record<number, RiskLevel | null>>({});
+
+  const riskColorMap: Record<RiskLevel, string> = {
+  [RiskLevel.Blue]: "#06b6d4",
+  [RiskLevel.Green]: "#16a34a",
+  [RiskLevel.Yellow]: "#ca8a04",
+  [RiskLevel.Red]: "#dc2626",
+};
+
+
+// Transportation form state
+const [fullName, setFullName] = useState("");
+const [plateNumber, setPlateNumber] = useState("");
+const [phoneNumber, setPhoneNumber] = useState("");
+const [productUnit, setProductUnit] = useState("");
+const [productAmount, setProductAmount] = useState<number | null>(null);
+const [licenceFile, setLicenceFile] = useState<File | null>(null);
+
+
+
+const submitTransport = async (stageExec: IServiceStageExecution) => {
+  if (!stageExec) return;
+
+  const fd = new FormData();
+  fd.append("FullName", fullName);
+  fd.append("PlateNumber", plateNumber);
+  fd.append("PhoneNumber", phoneNumber);
+  fd.append("ProductUnit", productUnit);
+  fd.append("ProductAmount", String(productAmount ?? 0));
+  fd.append("ServiceStageId", String(stageExec.id));
+
+  if (licenceFile) {
+    fd.append("LicenceDocumentImage", licenceFile);
+  }
+
+  await createStageTransport(fd);
+
+  antdMessage.success("Transportation saved");
+
+  // refresh stages so meta comes back
+  await getServiceStages(serviceId);
+};
+
+
+
+
+
+  // Load service and stages
+  /* useEffect(() => {
+  if (!serviceId) return;
+
+  const fetchServiceAndStages = async () => {
+    const service = await getServiceById(serviceId); // wait for service
+    const stages = await getServiceStages(serviceId); // wait for stages
+
+    
+    console.log("Service ID:", serviceId);
+    console.log("Service Data:", service);
+    console.log("Stages:");
+    stages.forEach((s) => {
+      console.log(`Stage ${s.stage} - Status: ${s.status}`);
+    });
+  };
+
+  fetchServiceAndStages();
+}, [serviceId, getServiceById, getServiceStages]); */
+
+
+const { user } = useAuthStore();
+
+/* useEffect(() => {
+  if (!serviceId || !user?.id) return;
+
+  const role = user.roles?.[0]?.roleName;
+
+  if (role === "caseExecutor") {
+    getAssignedServiceById(serviceId, user.id);
+  } else {
+    getServiceById(serviceId);
+    getServiceStages(serviceId);
+  }
+}, [serviceId, user?.id]); */
+
+
+
+
+/* useEffect(() => {
+  if (!serviceId || !user?.id) return;
+
+  const role = user.roles?.[0]?.roleName;
+
+  const load = async () => {
+    if (role === "caseExecutor") {
+      // ✅ CaseExecutor-safe endpoint
+      await getAssignedServiceById(serviceId, user.id);
+    } else {
+      // ✅ Admin endpoint
+      await getServiceById(serviceId);
+    }
+
+    // ✅ Now allowed for both roles
+    await getServiceStages(serviceId);
+  };
+
+  load();
+}, [serviceId, user?.id]); */
+
+
+useEffect(() => {
+  if (!serviceId || !user?.id) return;
+
+  const role = user.roles?.[0]?.roleName;
+
+  getServiceStages(serviceId);
+
+  const load = async () => {
+    let service;
+    if (role === "caseExecutor") {
+      service = await getAssignedServiceById(serviceId, user.id);
+    } else {
+      service = await getServiceById(serviceId);
+    }
+
+    await getServiceStages(serviceId);
+
+// ✅ work with store data
+const stages = currentService?.stages ?? [];
+
+stages.forEach((stage: any) => {
+  stage.documents = stage.documents?.map((d: any) => ({
+    ...d,
+    uploadedBy: d.uploadedByUserId === user?.id ? "CaseExecutor" : "Customer",
+  }));
+});
+
+//console.log("Stages with labeled documents:", stages);
+
+  };
+
+  load();
+}, [serviceId, user?.id]);
+
+
+
+
+  const stages: IServiceStageExecution[] = currentService?.stages ?? [];
+
+  const findStageExec = (stageEnum: ServiceStage) =>
+    stages.find((s) => s.stage === stageEnum) ?? null;
+
+  /* const uploadStageFile = async (
+  stageEnum: ServiceStage,
+  docType: DocumentType = DocumentType.Other
+) => {
+  const stageExec = findStageExec(stageEnum);
+  const file = stageFiles[stageEnum];
+  if (!stageExec || !file) return;
+
+  setUploading(true);
+  try {
+    const fd = new FormData();
+
+    //  MUST match backend parameter names
+    fd.append("serviceId", String(serviceId));
+    fd.append("stageId", String(stageExec.stage)); // enum value, NOT execution id
+    fd.append("file", file);
+    fd.append("documentType", String(docType));
+
+    const url = `/api/v1/CaseExecutor/UploadStageDocument`;
+
+    await http.post({
+      url,
+      data: fd,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    antdMessage.success("File uploaded successfully");
+
+    setStageFiles((prev) => ({ ...prev, [stageEnum]: null }));
+
+    // Refresh
+    await getServiceStages(serviceId);
+    await getServiceById(serviceId);
+  } catch (err: any) {
+    console.error(err);
+    antdMessage.error(err?.message || "Upload failed");
+  } finally {
+    setUploading(false);
+  }
+}; */
+
+const uploadStageFile = async (stageEnum: ServiceStage) => {
+  if (uploading) return;
+  const stageExec = findStageExec(stageEnum);
+  const file = stageFiles[stageEnum];
+  if (!stageExec || !file) return;
+
+  setUploading(true);
+  try {
+    await uploadStageDocument(
+      serviceId,
+      stageExec.id, // execution ID
+      file,
+      DocumentType.Other
+    );
+
+    // Clear after upload
+    setStageFiles(prev => ({ ...prev, [stageEnum]: null }));
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setUploading(false);
+  }
+};
+
+
+
+
+
+
+  /* const postStageComment = async (stageEnum: ServiceStage) => {
+    const stageExec = findStageExec(stageEnum);
+    const comment = stageComments[stageEnum] || "";
+    if (!stageExec) return;
+
+    setSaving(true);
+    try {
+      if (comment.trim() !== "") {
+        const url = `/Service/${serviceId}/stages/${stageExec.id}/comments`;
+        await http.post({
+          url,
+          data: {
+            Comment: comment,
+            CommentType: null,
+            IsInternal: false,
+            IsVisibleToCustomer: true,
+          },
+        });
+        antdMessage.success("Comment saved");
+        setStageComments(prev => ({ ...prev, [stageEnum]: "" }));
+      }
+
+      // Update stage status
+      await updateStageStatus(stageExec.id, StageStatus.Completed);
+      await getServiceStages(serviceId);
+      await getServiceById(serviceId);
+
+      // Log updated stages
+      const updatedStages = currentService?.stages ?? [];
+      console.log("Updated Stages:");
+      updatedStages.forEach(s => {
+        console.log(`Stage ${s.stage} - Status: ${s.status}`);
+      });
+
+    } catch (err: any) {
+      console.error(err);
+      antdMessage.error(err?.message || "Failed to save comment");
+    } finally {
+      setSaving(false);
+    }
+  }; */
+
+
+
+  const postStageComment = async (stageEnum: ServiceStage) => {
+    const stageExec = findStageExec(stageEnum);
+    const comment = stageComments[stageEnum] || "";
+    const file = stageFiles[stageEnum];
+
+    if (!stageExec) return;
+
+    setSaving(true);
+
+    try {
+    // 1️⃣ Upload document IF selected
+      if (file) {
+        const fd = new FormData();
+        fd.append("serviceId", String(serviceId));
+        fd.append("stageId", String(stageExec.stage)); // ✅ ENUM, NOT ID
+        fd.append("documentType", String(DocumentType.Other));
+        fd.append("File", file);
+
+
+
+  /* console.log("🚀 Uploading via CaseExecutor/UploadStageDocument");
+  for (const p of fd.entries()) console.log("📦", p); */
+
+  await http.post({
+    url: "/CaseExecutor/UploadStageDocument",
+    data: fd,
+  });
+
+  console.log("✅ Document uploaded successfully");
+}
+
+
+    // 2️⃣ Save comment
+    if (comment.trim()) {
+      await addStageComment(
+        serviceId,
+        stageExec.id,        // ✅ execution ID
+        stageComments[stageEnum],
+        false,               // isInternal
+        true                 // isVisibleToCustomer
+      );
+    }
+
+
+    // 3️⃣ Update stage status
+    await updateStageStatus(stageExec.id, StageStatus.Completed);
+
+    // 4️⃣ Refresh
+    await getServiceStages(serviceId);
+    await getServiceById(serviceId);
+
+    // 5️⃣ Cleanup
+    setStageFiles(prev => ({ ...prev, [stageEnum]: null }));
+    setStageComments(prev => ({ ...prev, [stageEnum]: "" }));
+
+    antdMessage.success("Stage saved successfully");
+    
+  } catch (err: any) {
+    console.error(err);
+    antdMessage.error("Failed to save stage");
+  } finally {
+    setSaving(false);
+  }
+};
+
+  const stageOrder = [
+    ServiceStage.PrepaymentInvoice,
+    //ServiceStage.TransitPermission,
+    //ServiceStage.Amendment,
+    ServiceStage.DropRisk,
+    ServiceStage.DeliveryOrder,
+    ServiceStage.WarehouseStatus,
+    ServiceStage.Inspection,
+    //ServiceStage.AssessmentandTaxPayment,
+    ServiceStage.Emergency,
+    ServiceStage.ExitandStoragePayment,
+    ServiceStage.Transportation,
+    ServiceStage.LocalPermission,
+    ServiceStage.Arrival,
+    ServiceStage.Clearance,
+  ];
+
+  const stageLabels = [
+    "Prepayment Invoice",
+    //"TransitPermission",
+    //"Amendment",
+    "Drop Risk",
+    "Delivery Order",
+    "Warehouse Status",
+    "Inspection",
+    //"Assessment & Tax Payment",
+    "Spot",
+    "Exit & Storage Payment",
+    "Transportation",
+    "Local Permission",
+    "Arrival",
+    "Clearance",
+    "Settlement",
+  ];
+
+  const StageHeader = ({ number, title, color }: { number: number; title: string; color?: string }) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+      <div style={{
+        width: 28,
+        height: 28,
+        borderRadius: 28,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: color ?? "#3b82f6",
+        color: "#fff",
+        fontWeight: 700,
+      }}>{number}</div>
+      <div style={{ fontWeight: 700, fontSize: 16 }}>{title}</div>
+    </div>
+  );
+
+  /* const renderDocsForStage = (stageExec: IServiceStageExecution | null) => {
+    if (!stageExec || !stageExec.documents || stageExec.documents.length === 0) {
+      return <div style={{ color: "#6b7280" }}>No attachments</div>;
+    }
+    return stageExec.documents.map((d: any) => (
+      <div key={d.id} style={{ display: "flex", justifyContent: "space-between", background: "#fbfbfd", padding: 8, borderRadius: 6, marginBottom: 8 }}>
+        <div>
+          <div style={{ fontWeight: 600 }}>{d.originalFileName ?? d.fileName}</div>
+          <div style={{ color: "#6b7280", fontSize: 12 }}>{new Date(d.uploadedDate).toLocaleString()}</div>
+        </div>
+        <div>
+          <Button
+  type="link"
+  onClick={() =>
+    downloadStageDocument(d.id, d.originalFileName ?? d.fileName)
+  }
+>
+  Download
+</Button>
+
+        </div>
+      </div>
+    ));
+  }; */
+
+const renderDocsForStage = (stageExec: IServiceStageExecution | null, stageTitle: string) => {
+  if (!stageExec || !stageExec.documents || stageExec.documents.length === 0) {
+    return <div style={{ color: "#6a7280" }}>No attachments</div>;
+  }
+
+  return (
+    <Button
+      onClick={() => {
+        setSelectedDocs(stageExec.documents!);
+        setSelectedStageTitle(stageTitle);
+        setDocsModalVisible(true);
+      }}
+    >
+      View Documents ({stageExec.documents.length})
+    </Button>
+  );
+};
+
+
+
+
+
+
+
+
+
+
+  return (
+    <div style={{ padding: 28, maxWidth: 1100, margin: "0 auto" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+        <h1>Stage Execution</h1>
+        <Button onClick={() => router.back()}>Back</Button>
+      </div>
+
+      {/* Progress Bar */}
+      <div style={{ marginBottom: 32, display: "flex", gap: 10 }}>
+        {stageOrder.map((stage, idx) => {
+          const stageExec = findStageExec(stage);
+          const isCompleted = stageExec?.status === StageStatus.Completed;
+          const isCurrent = currentService?.currentStage === stage;
+          return (
+            <div key={stage} style={{ textAlign: "center" }}>
+              <div style={{
+                width: 36,
+                height: 36,
+                borderRadius: 36,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: isCompleted ? "#3b82f6" : isCurrent ? "#2563eb" : "#e5e7eb",
+                color: isCompleted || isCurrent ? "#fff" : "#6b7280",
+                fontWeight: 600,
+                fontSize: 14,
+                border: "2px solid #d1d5db",
+              }}>{isCompleted ? "✓" : idx + 1}</div>
+              <div style={{ marginTop: 6, fontSize: 12 }}>{stageLabels[idx]}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Stage Blocks */}
+      {stageOrder.map((stage, idx) => {
+        const stageExec = findStageExec(stage);
+        const isInspection = stage === ServiceStage.Inspection;
+        const isPrepaymentInvoice = stage === ServiceStage.PrepaymentInvoice;
+        const isSpot = stage === ServiceStage.Emergency;
+        const isExit = stage === ServiceStage.ExitandStoragePayment;
+        const isDeliveryOrder = stage === ServiceStage.DeliveryOrder;
+
+
+
+
+        return (
+          <section key={stage} style={{ padding: 18, borderRadius: 8, marginBottom: 18, border: "1px solid #eef2f7" }}>
+            <StageHeader number={idx + 1} title={stageLabels[idx]} />
+
+
+
+
+            
+            {isSpot && (
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "1fr auto auto",
+      gap: 16,
+      alignItems: "center",
+      marginBottom: 24,
+    }}
+  >
+    {/* Left: Critical Updates / Comments */}
+    <div>
+      <div style={{ fontWeight: 600, marginBottom: 6 }}>
+        Critical Updates / Comments
+      </div>
+      <TextArea
+        style={{borderColor: "#FCA5A5" }}
+        placeholder="Add urgent customs comments..."
+        rows={2}
+        value={stageComments[stage] || ""}
+        onChange={(e) =>
+          setStageComments((prev) => ({
+            ...prev,
+            [stage]: e.target.value,
+          }))
+        }
+      />
+    </div>
+
+    {/* Middle: Mark as Released */}
+    <div style={{ textAlign: "center" }}>
+      <div style={{ fontWeight: 600, marginBottom: 6 }}>
+        Mark as Released
+      </div>
+      <Button
+        style={{
+          backgroundColor: "#E0EDFF",
+          borderColor: "#93C5FD",
+          color: "#1D4ED8",
+          fontWeight: 600,
+          minWidth: 140,
+        }}
+        onClick={async () => {
+          if (!stageExec) return;
+          await updateStageStatus(stageExec.id, StageStatus.Completed);
+          antdMessage.success("Marked as Released");
+        }}
+      >
+        🔓 Released
+      </Button>
+    </div>
+
+    {/* Right: Urgent Manager Notification */}
+    <div style={{ textAlign: "center" }}>
+      <div style={{ fontWeight: 600, marginBottom: 6 }}>
+        Urgent Manager Notification
+      </div>
+      <Button
+        danger
+        style={{
+          backgroundColor: "#FEE2E2",
+          borderColor: "#FCA5A5",
+          fontWeight: 600,
+          minWidth: 120,
+        }}
+        onClick={() => {
+          antdMessage.warning("Manager notified");
+        }}
+      >
+        🚨 Notify
+      </Button>
+    </div>
+  </div>
+)}
+
+
+{stage === ServiceStage.Transportation && stageExec && (
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(4, 1fr)",
+      gap: 16,
+      marginBottom: 24,
+    }}
+  >
+    <Input
+      placeholder="Driver Full Name"
+      value={fullName}
+      onChange={(e) => setFullName(e.target.value)}
+    />
+
+    <Input
+      placeholder="Car Plate Number"
+      value={plateNumber}
+      onChange={(e) => setPlateNumber(e.target.value)}
+    />
+
+    <Upload
+      beforeUpload={(file) => {
+        setLicenceFile(file);
+        return false;
+      }}
+      maxCount={1}
+    >
+      <Button>Choose Licence</Button>
+    </Upload>
+
+    <Input
+      placeholder="Phone Number"
+      value={phoneNumber}
+      onChange={(e) => setPhoneNumber(e.target.value)}
+    />
+
+    <Input
+      placeholder="Product Unit"
+      value={productUnit}
+      onChange={(e) => setProductUnit(e.target.value)}
+    />
+
+    <Input
+      type="number"
+      placeholder="Product Amount"
+      value={productAmount ?? ""}
+      onChange={(e) => setProductAmount(Number(e.target.value))}
+    />
+
+    <Button
+      type="primary"
+      onClick={() => submitTransport(stageExec)}
+    >
+      Save Transportation
+    </Button>
+  </div>
+)}
+
+
+
+
+
+
+{stage === ServiceStage.Clearance && (
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: 16,
+      marginBottom: 24,
+    }}
+  >
+    {/* Customer Requested Docs */}
+    <div>
+      <div style={{ marginBottom: 6 }}>Customer Requested Docs?</div>
+      <Select
+        defaultValue="No"
+        style={{ width: "100%" }}
+        options={[
+          { label: "Yes", value: "Yes" },
+          { label: "No", value: "No" },
+        ]}
+      />
+    </div>
+
+    {/* Upload Cleared Documents */}
+    <div>
+      <div style={{ marginBottom: 6 }}>Upload Cleared Documents</div>
+      <Upload beforeUpload={() => false} maxCount={1}>
+        <Button>Choose file</Button>
+      </Upload>
+    </div>
+
+    {/* Responsible Transporter */}
+    {/* <div>
+      <div style={{ marginBottom: 6 }}>Responsible Transporter</div>
+      <Select
+        placeholder="Tag Transporter"
+        style={{ width: "100%" }}
+        options={[
+          { label: "Transporter A", value: "A" },
+          { label: "Transporter B", value: "B" },
+          { label: "Transporter C", value: "C" },
+        ]}
+      />
+    </div> */}
+  </div>
+)}
+
+
+
+
+
+          {/* Upload */}
+{/* {stage !== ServiceStage.DropRisk && (
+  <div style={{ marginBottom: 24 }}>
+  <div style={{ marginBottom: 20 }}>
+  {stage === ServiceStage.Exit
+    ? "Photo of item (on-site)"
+    : "Upload Document"}
+</div>
+  <Space>
+    <Upload
+  beforeUpload={(f) => {
+    const realFile = (f as any).originFileObj ?? f;
+    setStageFiles(prev => ({ ...prev, [stage]: realFile }));
+    console.log("📁 File selected:", realFile);
+    return false;
+  }}
+  maxCount={1}
+  showUploadList
+>
+  <Button icon={<UploadOutlined />}>Choose file</Button>
+</Upload>
+
+    <Button
+  type="primary"
+  disabled={!stageFiles[stage]}
+  loading={uploading}
+  onClick={() => {
+    uploadStageFile(stage);
+  }}
+>
+  Upload
+</Button>
+
+  </Space>
+
+  {stage !== ServiceStage.DeliveryOrder &&
+    renderDocsForStage(stageExec, stageLabels[idx])}
+
+</div>
+)} */}
+
+
+{ stage !== ServiceStage.DropRisk && 
+  stage !== ServiceStage.Emergency &&
+  stage !== ServiceStage.Transportation &&
+  stage !== ServiceStage.Clearance && (
+  <div style={{ marginBottom: 24 }}>
+    <div style={{ marginBottom: 12 }}>
+      { stage === ServiceStage.WarehouseStatus  // exit will be changed to warehouse status stage (ServiceStage.WarehouseStatus) later
+        ? "Photo of item (on-site)"
+        : isInspection ? "Attach inspection document"
+        : isPrepaymentInvoice ? "Upload Proof of Receipt"
+        : isExit ? "Upload Storage Fee Receipt"
+        : isDeliveryOrder ? "Upload DO Document"
+        : "Upload Document"}
+    </div>
+
+    {/* 🔹 ONE ROW */}
+    <Space wrap>
+      {/* Main upload */}
+      <Upload
+        beforeUpload={(f) => {
+          const realFile = (f as any).originFileObj ?? f;
+          setStageFiles(prev => ({ ...prev, [stage]: realFile }));
+          return false;
+        }}
+        maxCount={1}
+        showUploadList
+      >
+        <Button icon={<UploadOutlined />}>Choose file</Button>
+      </Upload>
+
+      <Button
+        type="primary"
+        disabled={!stageFiles[stage]}
+        loading={uploading}
+        onClick={() => uploadStageFile(stage)}
+      >
+        Upload
+      </Button>
+
+
+
+      {/* 🔹 INSPECTION ONLY */}
+      {isInspection && (
+        <>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+  {/* Label ABOVE the button */}
+  {/* <div style={{ fontSize: 14, fontWeight: 400 }}>
+    Customer confirmation
+  </div> */}
+
+  <Button
+    icon={<LikeOutlined />}
+    style={{
+      backgroundColor: "#DCFCE7",
+      borderColor: "#86EFAC",
+      color: "#166534",
+      borderWidth: 1,
+      fontWeight: 500,
+      textAlign: "right"
+    }}
+  >
+    Customer Agreed
+  </Button>
+</div>
+
+
+          <Upload
+            beforeUpload={(f) => {
+              const realFile = (f as any).originFileObj ?? f;
+              setStageFiles(prev => ({
+                ...prev,
+                [`${stage}-second-invoice`]: realFile as any,
+              }));
+              return false;
+            }}
+            maxCount={1}
+            showUploadList
+          >
+            <Button icon={<UploadOutlined />}>
+              Upload Second Tax Invoice
+            </Button>
+          </Upload>
+        </>
+      )}
+
+      {/* View documents (unchanged rule) */}
+      {stage !== ServiceStage.DeliveryOrder &&
+        renderDocsForStage(stageExec, stageLabels[idx])}
+    </Space>
+  </div>
+)}
+
+
+            {/* Comment */}
+            { stage !== ServiceStage.DropRisk &&
+              stage !== ServiceStage.DeliveryOrder && 
+              stage !== ServiceStage.Emergency &&
+              stage !== ServiceStage.ExitandStoragePayment &&
+              stage !== ServiceStage.Transportation &&
+              stage !== ServiceStage.Clearance && (
+              
+  <div style={{ marginBottom: 12 }}>
+              <div style={{ marginBottom: 6 }}>
+  {stage === ServiceStage.WarehouseStatus
+    ? "Settlement Notes"
+    :isInspection ? "Summary (from Customs System)"
+    : "Comments" }
+</div>
+
+              <TextArea rows={2} value={stageComments[stage] || ""} onChange={(e) => setStageComments(prev => ({ ...prev, [stage]: e.target.value }))} />
+            </div>
+            )}
+
+     {/* 🔵 DROP RISK – Risk Level Selection */}
+{stage === ServiceStage.DropRisk && stageExec && (
+  <div style={{ marginBottom: 30 }}>
+    <div style={{ marginBottom: 24, fontWeight: 600 }}>
+      Select Risk Level
+    </div>
+
+    <Space wrap>
+      {[
+        { label: "Blue", value: RiskLevel.Blue, color: "#06b6d4" },
+        { label: "Green", value: RiskLevel.Green, color: "#16a34a" },
+        { label: "Yellow", value: RiskLevel.Yellow, color: "#ca8a04" },
+        { label: "Red", value: RiskLevel.Red, color: "#dc2626" },
+      ].map((r) => {
+        const isSelected = riskSelections[stage] === r.value;
+
+        return (
+          <Button
+            key={r.value}
+            size="small"
+            style={{
+              borderRadius: 9999, // pill
+              backgroundColor: isSelected ? r.color : "#fff",
+              color: isSelected ? "#fff" : r.color,
+              borderColor: r.color,
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              if (!isSelected) {
+                e.currentTarget.style.backgroundColor = r.color;
+                e.currentTarget.style.color = "#fff";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isSelected) {
+                e.currentTarget.style.backgroundColor = "#fff";
+                e.currentTarget.style.color = r.color;
+              }
+            }}
+            
+            onClick={async () => {
+              try {
+                console.log("🟡 Sending risk level to backend:", {
+                  stageExecutionId: stageExec.id,
+                  riskLevel: r.value,
+                });
+
+                // 1️⃣ Save locally (UI)
+                setRiskSelections((prev) => ({
+                  ...prev,
+                  [stage]: r.value,
+                }));
+
+                // 2️⃣ Send to backend
+                await setRiskLevel(serviceId, r.value);
+
+                console.log("✅ Risk level saved successfully");
+                antdMessage.success(`Risk set to ${r.label}`);
+              } catch (err) {
+                console.error("❌ Failed to save risk level", err);
+                antdMessage.error("Failed to save risk level");
+              }
+            }}
+          >
+            {r.label}
+          </Button>
+        );
+      })}
+    </Space>
+  </div>
+)}
+
+
+
+
+
+
+
+            {/* Save & Next */}
+            <div>
+              <Button type="primary" onClick={async () => { await postStageComment(stage); }} loading={saving}>
+                Save & Next
+              </Button>
+            </div>
+          </section>
+        );
+      })}
+
+
+<Modal
+  open={docsModalVisible}
+  onCancel={() => setDocsModalVisible(false)}
+  footer={null}
+  title={`Documents - ${selectedStageTitle}`}
+>
+  {selectedDocs.map((d) => (
+    <div key={d.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, padding: 8, background: "#fbfbfd", borderRadius: 6 }}>
+      <div>
+        <div style={{ fontWeight: 600 }}>{d.originalFileName ?? d.fileName}</div>
+        <div style={{ color: "#6b7280", fontSize: 12 }}>
+          {new Date(d.uploadedDate).toLocaleString()} • {d.uploadedByUserId === user?.id ? "CaseExecutor" : "Customer"}
+        </div>
+      </div>
+      <Button
+        type="link"
+        onClick={() => downloadStageDocument(d.id, d.originalFileName ?? d.fileName)}
+      >
+        Download
+      </Button>
+    </div>
+  ))}
+</Modal>
+
+
+
+    </div>
+  );
+}
