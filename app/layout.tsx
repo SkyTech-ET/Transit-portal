@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: "Transit",
   description: "Transit app",
   icons: {
-    icon: "/transitlogo.ico", // Add your favicon here
+    icon: "/transitlogo.ico", 
   },
 };
 

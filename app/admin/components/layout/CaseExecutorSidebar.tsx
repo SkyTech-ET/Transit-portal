@@ -57,7 +57,7 @@ export default function CaseExecutorSidebar() {
           label: "Documents",
           children: [
             {
-              key: "/admin/caseExecutor/documents",
+              key: "/admin/document",
               icon: <FileTextOutlined />,
               label: "Document Center",
             },
@@ -98,11 +98,11 @@ export default function CaseExecutorSidebar() {
               icon: <UserOutlined />,
               label: "Profile",
             },
-            {
+            /* {
               key: "/case-executor/activity-log",
               icon: <ProfileOutlined />,
               label: "My Activity Log",
-            },
+            }, */
           ],
         },
       ]}

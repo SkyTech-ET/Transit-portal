@@ -77,39 +77,35 @@
 
 
     useEffect(() => {
-      const loadDashboardData = async () => {
-        if (!currentUser?.id) return;
+  const loadDashboardData = async () => {
+    if (!currentUser?.id) return;
 
-      // ✅ LOAD SERVICES FIRST
-      await getCustomerServices(currentUser.id, 2);
+    // 1️⃣ Load services and users
+    await getCustomerServices(currentUser.id, 2);
+    await getAllServices({ recordStatus: 2 });
+    await getUsers(2);
 
-      await getAllServices({ recordStatus: 2 }); // fetch all services
-      await getUsers(2); // fetch all users
+    // 2️⃣ Load reports based on role
+    if (isAdmin) {
+      await getAllReport(filterPayload);
+      await getAllReportSort(filterPayload);
+    } else if (currentUser?.organization?.id != null) {
+      const orgId = currentUser.organization.id;
+      setOrgId(orgId);
+      await getReportsByOrg(orgId);
+      await getReportsByOrgSort(orgId);
+    }
 
+    
+    // ===== PROGRESS CALCULATION =====
+const progressEntries: [number, number][] = [];
+const execMap: Record<number, { name: string }> = {};
 
-      console.log("Users", getUsers);
-      console.log("All Services", getAllServices);
-      
+const allServices = useServiceStore.getState().services;
 
-
-      if (isAdmin) {
-        getAllReport(filterPayload);
-        getAllReportSort(filterPayload);
-      } else if (currentUser?.organization?.id != null) {
-        const orgId = currentUser.organization.id;
-        setOrgId(orgId);
-        getReportsByOrg(orgId);
-        getReportsByOrgSort(orgId);
-      }
-
-    const progressEntries: [number, number][] = [];
-    const execMap: Record<number, { name: string }> = {};
-
-  for (const service of services) {
-    await getServiceStages(service.id);
-
-    const stages =
-      useServiceStore.getState().currentService?.stages ?? [];
+await Promise.all(
+  allServices.map(async (service) => {
+    const stages = (await getServiceStages(service.id)) ?? [];
 
     const completedCount = stages.filter(
       (s) => s.status === StageStatus.Completed
@@ -118,39 +114,30 @@
     const percent =
       stages.length === 0
         ? 0
-        : Math.round(
-            (completedCount / stageOrder.length) * 100
-          );
+        : Math.round((completedCount / stageOrder.length) * 100);
 
     progressEntries.push([service.id, percent]);
 
-    // executor
     if (service.assignedCaseExecutorId) {
-      const res = (await getUser(
-    service.assignedCaseExecutorId
-  )) as unknown as {
-    payload?: {
-      firstName: string;
-      lastName: string;
-    };
+      const res = (await getUser(service.assignedCaseExecutorId)) as any;
+      if (res.payload) {
+        execMap[service.assignedCaseExecutorId] = {
+          name: `${res.payload.firstName} ${res.payload.lastName}`,
+        };
+      }
+    }
+  })
+);
+
+setProgressMap(Object.fromEntries(progressEntries));
+setExecutors(execMap);
+
   };
 
-  if (res.payload) {
-    execMap[service.assignedCaseExecutorId] = {
-      name: `${res.payload.firstName} ${res.payload.lastName}`,
-    };
-  }
-
-    }
-  }
-
-  setProgressMap(Object.fromEntries(progressEntries));
-  setExecutors(execMap);
-
-      };
-
   loadDashboardData();
-    }, [services, isAdmin, currentUser, getAllServices, getUsers]);
+}, [isAdmin, currentUser, getAllServices]);
+
+
 
 
     interface WeeklyChartItem {

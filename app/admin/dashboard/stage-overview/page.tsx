@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import {
   Table,
   Tag,
-  Avatar,
   Button,
   Card,
   Space,
   Input,
+  Avatar,
 } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import { Eye } from "lucide-react";
 
 import { useServiceStore } from "@/modules/mot/service/service.store";
@@ -17,9 +18,7 @@ import { useUserStore } from "@/modules/user";
 import { getServiceStatus } from "@/modules/mot/service/serviceStatus.util";
 import { StageStatus, ServiceType, IService } from "@/modules/mot/service/service.types";
 
-
-//const employeeRoles = [2, 4, 5];
-
+const BASEURL = "https://transitportal.skytechet.com";
 
 const statusLabelMap: Record<StageStatus, string> = {
   [StageStatus.NotStarted]: "Not Started",
@@ -43,41 +42,11 @@ const roleStyleMap: Record<
   string,
   { bg: string; color: string; border: string }
 > = {
-  CaseExecutor: {
-    bg: "#E6FFFB",      // teal pastel
-    color: "#08979C",
-    border: "#87E8DE",
-  },
-  DataEncoder: {
-    bg: "#FFFBE6",      // soft yellow
-    color: "#D48806",
-    border: "#FFE58F",
-  },
-  Assessor: {
-    bg: "#F0F5FF",      // soft blue
-    color: "#2F54EB",
-    border: "#ADC6FF",
-  },
-  SuperAdmin: {
-    bg: "#F6FFED",      // soft green
-    color: "#389E0D",
-    border: "#B7EB8F",
-  },
+  CaseExecutor: { bg: "#E6FFFB", color: "#08979C", border: "#87E8DE" },
+  DataEncoder: { bg: "#FFFBE6", color: "#D48806", border: "#FFE58F" },
+  Assessor: { bg: "#F0F5FF", color: "#2F54EB", border: "#ADC6FF" },
+  SuperAdmin: { bg: "#F6FFED", color: "#389E0D", border: "#B7EB8F" },
 };
-
-
-
-
-const serviceTypeLabelMap: Record<ServiceType, string> = {
-  [ServiceType.Multimodal]: "Multimodal",
-  [ServiceType.Unimodal]: "Unimodal",
-};
-
-interface ExecutorInfo {
-  name: string;
-  photo?: string;
-}
-
 
 const stageLabelMap: Record<number, string> = {
   1: "PrepaymentInvoice",
@@ -96,24 +65,15 @@ const stageLabelMap: Record<number, string> = {
   14: "Clearance",
 };
 
-export enum ServiceStage {
-  PrepaymentInvoice = 1,
-  TransitPermission=2,
-  Amendment=3,
-  DropRisk = 4,
-  DeliveryOrder = 5,
-  WarehouseStatus=6,
-  Inspection = 7,
-  AssessmentandTaxPayment=8,
-  Emergency = 9,
-  ExitandStoragePayment = 10,
-  Transportation = 11,
-  LocalPermission = 12, // Unimodal only
-  Arrival = 13, // Unimodal only
-  Clearance = 14,
+interface CustomerInfo {
+  name: string;
+  photo?: string;
 }
 
-
+interface ExecutorInfo {
+  name: string;
+  photo?: string;
+}
 
 export default function ServiceRequestsPage() {
   const { services, loading, getAllServices, getServiceStages } = useServiceStore();
@@ -122,127 +82,107 @@ export default function ServiceRequestsPage() {
   const [search, setSearch] = useState("");
   const [staffSearch, setStaffSearch] = useState("");
   const [serviceStatusMap, setServiceStatusMap] = useState<Record<number, StageStatus>>({});
-  const [customerMap, setCustomerMap] = useState<Record<number, { name: string; avatar?: string }>>({});
-  const [serviceExecutorsMap, setServiceExecutorsMap] = useState<Record<number, { name: string; avatar?: string, photo?: string }[]>>({});
-  const [executorMap, setExecutorMap] = useState<Record<number, ExecutorInfo>>({}); 
-  const [employeeStageMap, setEmployeeStageMap] = useState<
-  Record<number, { stageName: string; lastUpdated?: string }>
->({});
-
-
+  const [customerMap, setCustomerMap] = useState<Record<number, CustomerInfo>>({});
+  const [serviceExecutorsMap, setServiceExecutorsMap] = useState<Record<number, ExecutorInfo[]>>({});
+  const [employeeStageMap, setEmployeeStageMap] = useState<Record<number, { stageName: string; lastUpdated?: string }>>({});
   const [currentStageMap, setCurrentStageMap] = useState<Record<number, { stageName: string; lastUpdated?: string }>>({});
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [usersWithPhoto, setUsersWithPhoto] = useState<any[]>([]);
 
-  //const [customerMap, setCustomerMap] = useState<Record<number, string>>({});
 
   // ---------------- LOAD DATA ---------------- //
   useEffect(() => {
-    const loadData = async () => {
-      
-      await getAllServices({ recordStatus: 2 }); // fetch all services
-      await getUsers(2); // fetch all users
+  const loadAllData = async () => {
+    try {
+      // ---------------- FETCH SERVICES & USERS ---------------- //
+      const [servicesData, allUsers] = await Promise.all([
+        getAllServices({ recordStatus: 2 }), // active services
+        getUsers(2), // fetch users, populates the store
+      ]);
+
+      // ---------------- BUILD USER MAP ---------------- //
+      const userMap: Record<number, any> = {};
+      for (const user of useUserStore.getState().users) {
+        const fullUser = await useUserStore.getState().getUser(user.id);
+        if (fullUser) userMap[user.id] = fullUser;
+      }
+
+      // ---------------- FETCH SERVICE STAGES ---------------- //
+      const stagePromises = servicesData.map(async (service: any) => {
+        await getServiceStages(service.id);
+        const currentService = useServiceStore.getState().currentService;
+        return { service, stages: currentService?.stages ?? [] };
+      });
+
+      const serviceStagesResults = await Promise.all(stagePromises);
+
+      // ---------------- BUILD MAPS ---------------- //
+      const customerMapLocal: Record<number, CustomerInfo> = {};
+      const executorsMapLocal: Record<number, ExecutorInfo[]> = {};
+      const employeeStageMapLocal: Record<number, { stageName: string; lastUpdated?: string }> = {};
+      const currentStageMapLocal: Record<number, { stageName: string; lastUpdated?: string }> = {};
+      const serviceStatusMapLocal: Record<number, StageStatus> = {};
+
+      for (const { service, stages } of serviceStagesResults) {
+        // Current stage
+        const currentStage = stages.find(s => !s.completedAt) || stages[stages.length - 1];
+        if (currentStage) {
+          currentStageMapLocal[service.id] = {
+            stageName: stageLabelMap[currentStage.stage] || `Stage ${currentStage.stage}`,
+            lastUpdated: currentStage.completedAt || "—",
+          };
+        }
+
+        // Status
+        serviceStatusMapLocal[service.id] = getServiceStatus(stages);
+
+        // Customer
+        if (service.customerId && userMap[service.customerId]) {
+          const customer = userMap[service.customerId];
+          customerMapLocal[service.customerId] = {
+            name: `${customer.firstName} ${customer.lastName}`,
+            photo: customer.profilePhoto,
+          };
+        }
+
+        // Case Executor
+        if (service.assignedCaseExecutorId && userMap[service.assignedCaseExecutorId]) {
+          const executor = userMap[service.assignedCaseExecutorId];
+          executorsMapLocal[service.id] = [
+            { name: `${executor.firstName} ${executor.lastName}`, photo: executor.profilePhoto }
+          ];
+
+          const latestStage = [...stages].filter(s => s.completedAt).pop();
+          if (latestStage) {
+            employeeStageMapLocal[service.assignedCaseExecutorId] = {
+              stageName: stageLabelMap[latestStage.stage] || `Stage ${latestStage.stage}`,
+              lastUpdated: latestStage.completedAt,
+            };
+          }
+        }
+      }
+
+      // ---------------- UPDATE STATE ---------------- //
+      setCustomerMap(customerMapLocal);
+      setServiceExecutorsMap(executorsMapLocal);
+      setEmployeeStageMap(employeeStageMapLocal);
+      setCurrentStageMap(currentStageMapLocal);
+      setServiceStatusMap(serviceStatusMapLocal);
+
+    } catch (err) {
+      console.error("Error loading stage-overview page data:", err);
     }
-    loadData();
-  }, [getAllServices, getUsers]);
-
-   useEffect(() => {
-    const fetchData = async () => {
-    const customerMapLocal: Record<number, { name: string; avatar?: string }> = {};
-    const statusMapLocal: Record<number, StageStatus> = {};
-    const executorsMapLocal: Record<number, { name: string; avatar?: string }[]> = {};
-    const currentStageMapLocal: Record<number, { stageName: string; lastUpdated: string }> = {};
-    const employeeStageMapLocal: Record<number, { stageName: string; lastUpdated: string }> = {};
-
-    for (const service of services) {
-      // 1️⃣ Fetch stages
-      await getServiceStages(service.id);
-      const currentService = useServiceStore.getState().currentService;
-      const stages = currentService?.stages ?? [];
-
-      // 2️⃣ Map CaseExecutor stage
-      if (service.assignedCaseExecutorId) {
-        const latestStage = [...stages].filter((s) => s.completedAt).pop();
-        if (latestStage) {
-          employeeStageMapLocal[service.assignedCaseExecutorId] = {
-            stageName: stageLabelMap[latestStage.stage] || `Stage ${latestStage.stage}`,
-            lastUpdated: latestStage.completedAt,
-          };
-        }
-      }
-
-      // 3️⃣ Map Assessor stage
-      /* if (service.assignedAssessorId) {
-        const latestStage = [...stages].filter((s) => s.completedAt).pop();
-        if (latestStage) {
-          employeeStageMapLocal[service.assignedAssessorId] = {
-            stageName: stageLabelMap[latestStage.stage] || `Stage ${latestStage.stage}`,
-            lastUpdated: latestStage.completedAt,
-          };
-        }
-      } */
-
-      // 4️⃣ Map DataEncoder stage
-      if (service.createdByDataEncoderId) {
-        const latestStage = [...stages].filter((s) => s.completedAt).pop();
-        if (latestStage) {
-          employeeStageMapLocal[service.createdByDataEncoderId] = {
-            stageName: stageLabelMap[latestStage.stage] || `Stage ${latestStage.stage}`,
-            lastUpdated: latestStage.completedAt,
-          };
-        }
-      }
-
-      // 5️⃣ Current stage for service
-      const currentStage = stages.find((s) => !s.completedAt) || stages[stages.length - 1];
-      if (currentStage) {
-        currentStageMapLocal[service.id] = {
-          stageName: stageLabelMap[currentStage.stage] || `Stage ${currentStage.stage}`,
-          lastUpdated: currentStage.completedAt || "—",
-        };
-      }
-
-      // 6️⃣ Status
-      statusMapLocal[service.id] = getServiceStatus(stages);
-
-      // 7️⃣ Customer
-      if (service.customerId) {
-        const customer = await useUserStore.getState().getUser(service.customerId);
-        customerMapLocal[service.customerId] = customer
-          ? { name: `${customer.firstName} ${customer.lastName}`, avatar: customer.avatarUrl }
-          : { name: "Unknown" };
-      }
-
-      // 8️⃣ Case Executors for table
-      if (service.assignedCaseExecutorId) {
-        const executor = await useUserStore.getState().getUser(service.assignedCaseExecutorId);
-        executorsMapLocal[service.id] = executor
-          ? [{ name: `${executor.firstName} ${executor.lastName}`, avatar: executor.avatarUrl }]
-          : [];
-      } else {
-        executorsMapLocal[service.id] = [];
-      }
-    }
-
-    // 9️⃣ Update state once
-    setCustomerMap(customerMapLocal);
-    setServiceStatusMap(statusMapLocal);
-    setServiceExecutorsMap(executorsMapLocal);
-    setCurrentStageMap(currentStageMapLocal);
-    setEmployeeStageMap(employeeStageMapLocal);
-
-    console.log("employeeStageMapLocal", employeeStageMapLocal);
-    console.log("currentStageMapLocal", currentStageMapLocal);
   };
 
-  if (services.length) fetchData();
-}, [services, getServiceStages, getUsers]);
+  loadAllData();
+}, [getAllServices, getServiceStages, getUsers]);
 
 
-
-
-
+  const handleView = async (record: any) => {
+  setSelectedEmployee(record);
+  }
 
   // ---------------- FILTER SERVICES ---------------- //
-  
   const filteredServices = services.filter((service) => {
     const keyword = search.toLowerCase();
     return (
@@ -251,155 +191,111 @@ export default function ServiceRequestsPage() {
       customerMap[service.customerId]?.name.toLowerCase().includes(keyword)
     );
   });
-  
 
-  // ---------------- FILTER EMPLOYEES ---------------- //
-  const employeeUsers = users.filter((user: any) => {
+  // ---------------- FILTER STAFF ---------------- //
+ const employeeUsers = users.filter((user: any) => {
   const roleNames =
     user.userRoles?.map((r: any) => r.roleName) ??
     user.roles?.map((r: any) => r.name) ??
     [];
-
-  // Exclude customers
+  // Exclude Customer and SuperAdmin
   return roleNames.length > 0 && !roleNames.includes("Customer") && !roleNames.includes("SuperAdmin");
 });
 
-
-
-  const filteredStaff = employeeUsers.filter((staff: any) => {
-    const keyword = staffSearch.toLowerCase();
-    return (
-      staff.firstName?.toLowerCase().includes(keyword) ||
-      staff.lastName?.toLowerCase().includes(keyword) ||
-      staff.username?.toLowerCase().includes(keyword)
-    );
-  });
+const filteredStaff = employeeUsers.filter((staff: any) => {
+  const keyword = staffSearch.toLowerCase();
+  return (
+    staff.firstName?.toLowerCase().includes(keyword) ||
+    staff.lastName?.toLowerCase().includes(keyword) ||
+    staff.username?.toLowerCase().includes(keyword)
+  );
+});
 
   const getStaffRoles = (user: any) => {
-  if (user.userRoles) {
-    return user.userRoles.map((r: any) => ({
-      roleName: r.roleName,
-    }));
+    if (user.userRoles) return user.userRoles.map((r: any) => ({ roleName: r.roleName }));
+    if (user.roles) return user.roles.map((r: any) => ({ roleName: r.name }));
+    return [];
+  };
+
+  const getFullName = (user: any) => `${user.firstName || ""} ${user.lastName || ""}`.trim();
+
+  const getProfilePhotoUrl = (employee: any) => {
+  const photo = employee?.profilePhoto;
+
+  if (!photo || photo === "null") {
+    return "/images/avatar-placeholder.png";
   }
 
-  if (user.roles) {
-    return user.roles.map((r: any) => ({
-      roleName: r.name,
-    }));
-  }
+  // Remove Windows backslashes safely
+  const fileName = photo.replace(/\\/g, "/").split("/").pop();
 
-  return [];
+  return `${BASEURL}/Profile_Photo/${fileName}`;
 };
 
 
-  const getStatusTag = (serviceId: number) => {
-    const numericStatus = serviceStatusMap[serviceId]
-    const status = serviceStatusMap[serviceId] || "NotStarted";
-    const statusColorMap: Record<string, string> = {
-      NotStarted: "default",
-      Pending: "orange",
-      InProgress: "blue",
-      Completed: "green",
-      Blocked: "red",
-      NeedsReview: "purple",
-    };
-    return <Tag color={statusColorMap[status]}>{status}</Tag>;
-  };
-
-  const getAvatarInitial = (user: any) =>
-    user.firstName?.[0] || user.username?.[0] || "U";
-
-  const getFullName = (user: any) =>
-    `${user.firstName || ""} ${user.lastName || ""}`.trim();
-
   // ---------------- SERVICE TABLE ---------------- //
   const serviceColumns = [
+    { title: "Service Number", dataIndex: "serviceNumber", key: "serviceNumber" },
     {
-      title: "Service Number",
-      dataIndex: "serviceNumber",
-      key: "serviceNumber",
-    },
-       {
       title: "Customer",
       key: "customer",
       render: (_: any, record: IService) => {
         const customer = customerMap[record.customerId];
+        if (!customer) return <Tag color="default">Unknown</Tag>;
+        const profileUrl = customer.photo
+          ? `${BASEURL}/${customer.photo.split("\\").pop()}`
+          : "/images/avatar-placeholder.png";
         return (
-          <Space>
-            <Avatar
-              size={32}
-              src={customer?.avatar}
-              style={{ backgroundColor: customer?.avatar ? undefined : "#87d068" }}
-            >
-              {!customer?.avatar && customer?.name?.[0]?.toUpperCase()}
-            </Avatar>
-            <span>{customer?.name || "Unknown"}</span>
-          </Space>
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <img src={profileUrl} alt={customer.name} className="w-6 h-6 rounded-full object-cover" />
+            <span>{customer.name}</span>
+          </div>
         );
       },
     },
-    /* {
-      title: "Description",
-      dataIndex: "itemDescription",
-      key: "itemDescription",
-    }, */
     {
       title: "Type",
       dataIndex: "serviceType",
       key: "serviceType",
-      render: (t: number) => (
-        <Tag color={t === 1 ? "cyan" : "purple"}>
-          {t === 1 ? "Multimodal" : "Unimodal"}
-        </Tag>
-      ),
+      render: (t: number) => <Tag color={t === 1 ? "cyan" : "purple"}>{t === 1 ? "Multimodal" : "Unimodal"}</Tag>,
     },
     {
       title: "Registered On",
       dataIndex: "registeredDate",
       key: "registeredDate",
+      responsive: ['md'],
       render: (d: string) => new Date(d).toLocaleString(),
     },
-    { title: "Status", key: "status", render: (_: any, record: IService) => {
-      const status = serviceStatusMap[record.id] ?? StageStatus.NotStarted;
-      return <Tag color={statusColorMap[status]}>{statusLabelMap[status]}</Tag>;
-    }},
-   
-  {
-  title: "Case Executor",
-  key: "assignedCaseExecutor",
-  render: (_: any, record: IService) => {
-    const executors = serviceExecutorsMap[record.id] || [];
+    {
+      title: "Status",
+      key: "status",
+      render: (_: any, record: IService) => {
+        const status = serviceStatusMap[record.id] ?? StageStatus.NotStarted;
+        return <Tag color={statusColorMap[status]}>{statusLabelMap[status]}</Tag>;
+      },
+    },
+    {
+      title: "Case Executor",
+      key: "assignedCaseExecutor",
+      render: (_: any, record: IService) => {
+        const executors = serviceExecutorsMap[record.id] || [];
+        if (!record.assignedCaseExecutorId || executors.length === 0)
+          return <Tag color="default">Unassigned</Tag>;
 
-    if (!record.assignedCaseExecutorId || executors.length === 0)
-      return <Tag color="default">Unassigned</Tag>;
+        const executor = executors[0];
+        const profileUrl = executor.photo
+          ? `${BASEURL}/${executor.photo.split("\\").pop()}`
+          : "/images/avatar-placeholder.png";
 
-    const executor = executors[0];
-    const BASEURL = "https://transitportal.skytechet.com";
-
-    return (
-      <div className="flex items-center gap-2">
-        {executor.avatar ? (
-          <img
-            src={`${BASEURL}/${executor.avatar.replace(/\\/g, "/")}`}
-            alt={executor.name}
-            className="w-6 h-6 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-white">
-            {executor.name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")
-              .toUpperCase()}
+        return (
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <img src={profileUrl} alt={executor.name} className="w-6 h-6 rounded-full object-cover" />
+            <span>{executor.name}</span>
           </div>
-        )}
-        <span>{executor.name}</span>
-      </div>
-    );
-  },
-},
-
-  {
+        );
+      },
+    },
+    {
       title: "Actions",
       key: "actions",
       render: (record: any) => (
@@ -414,120 +310,91 @@ export default function ServiceRequestsPage() {
     },
   ];
 
-
-
-
-
   // ---------------- STAFF TABLE ---------------- //
   const stageColumns = [
-    {
-      title: "Staff",
-      render: (staff: any) => (
-        <Space>
-          <Avatar>{getAvatarInitial(staff)}</Avatar>
-          {getFullName(staff)}
+  {
+    title: "Staff",
+    render: (staff: any) => {
+      if (!staff) return <Tag color="default">—</Tag>;
+
+      const fullName = `${staff.firstName || ""} ${staff.lastName || ""}`.trim();
+
+      const profileUrl =getProfilePhotoUrl(staff);
+
+      return (
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          <Avatar
+            size={32}
+            src={profileUrl}
+            icon={<UserOutlined />}
+          />
+          <span>{fullName}</span>
+        </div>
+      );
+    },
+  },
+  {
+    title: "Roles",
+    render: (staff: any) => {
+      const roles = getStaffRoles(staff);
+      return (
+        <Space wrap>
+          {roles.map((r: any) => {
+            const style = roleStyleMap[r.roleName];
+            return (
+              <Tag
+                key={r.roleId || r.roleName}
+                style={{
+                  backgroundColor: style?.bg || "#f5f5f5",
+                  color: style?.color || "#595959",
+                  border: `1px solid ${style?.border || "#d9d9d9"}`,
+                  fontWeight: 400,
+                }}
+              >
+                {r.roleName}
+              </Tag>
+            );
+          })}
         </Space>
-      ),
+      );
     },
-    {
-  title: "Roles",
-  render: (staff: any) => {
-    const roles = getStaffRoles(staff);
-    return (
-      <Space wrap>
-        {roles.map((r: any) => {
-          const style = roleStyleMap[r.roleName];
-          return (
-            <Tag
-              key={r.roleId}
-              style={{
-                backgroundColor: style?.bg || "#f5f5f5",
-                color: style?.color || "#595959",
-                border: `1px solid ${style?.border || "#d9d9d9"}`,
-                fontWeight: 400,
-              }}
-            >
-              {r.roleName}
-            </Tag>
-          );
-        })}
-      </Space>
-    );
   },
-},
-
-{
-  title: "Current Stage",
-  render: (staff: any) => {
-    const info = employeeStageMap[staff.id];
-    return info?.stageName ? (
-      <Tag color="blue">{info.stageName}</Tag>
-    ) : (
-      <Tag color="default">—</Tag>
-    );
-  },
-},
-{
-  title: "Last Updated",
-  render: (staff: any) => {
-    const info = employeeStageMap[staff.id];
-    return info?.lastUpdated
-      ? new Date(info.lastUpdated).toLocaleString()
-      : "—";
-  },
-},
-
-
-
-    {
-      title: "Email",
-      dataIndex: "email",
+  {
+    title: "Current Stage",
+    render: (staff: any) => {
+      const info = employeeStageMap[staff.id];
+      return info?.stageName ? <Tag color="blue">{info.stageName}</Tag> : <Tag color="default">—</Tag>;
     },
-  ];
+  },
+  {
+    title: "Last Updated",
+    render: (staff: any) => {
+      const info = employeeStageMap[staff.id];
+      return info?.lastUpdated ? new Date(info.lastUpdated).toLocaleString() : "—";
+    },
+  },
+  { title: "Email", dataIndex: "email" },
+];
+
 
   return (
-    <div className="p-6 space-y-6">
-      {/* ---------------- SERVICE REQUESTS ---------------- */}
+    <div className="flex w-full min-h-screen overflow-x-hidden flex-col gap-6">
       <Card
         title="All Services"
-        extra={
-          <Input
-            placeholder="Search services..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ width: 240 }}
-            allowClear
-          />
-        }
+        extra={<Input placeholder="Search services..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', maxWidth: 240 }} allowClear />}
       >
-        <Table
-          rowKey="id"
-          columns={serviceColumns}
-          dataSource={filteredServices}
-          loading={loading}
-          pagination={{ pageSize: 10 }}
-        />
+        <div className="overflow-x-auto">
+          <Table rowKey="id" columns={serviceColumns} dataSource={filteredServices} loading={loading} pagination={{ pageSize: 10 }} scroll={{ x: 1000 }} />
+        </div>
       </Card>
 
-      {/* ---------------- STAFF TABLE ---------------- */}
       <Card
         title="STAGE OVERVIEW (Employees)"
-        extra={
-          <Input
-            placeholder="Search staff..."
-            value={staffSearch}
-            onChange={(e) => setStaffSearch(e.target.value)}
-            style={{ width: 200 }}
-            allowClear
-          />
-        }
+        extra={<Input placeholder="Search staff..." value={staffSearch} onChange={e => setStaffSearch(e.target.value)} style={{ width: '100%', maxWidth: 200 }} allowClear />}
       >
-        <Table
-          rowKey="id"
-          columns={stageColumns}
-          dataSource={filteredStaff}
-          pagination={{ pageSize: 10 }}
-        />
+        <div className="overflow-x-auto">
+          <Table rowKey="id" columns={stageColumns} dataSource={filteredStaff} pagination={{ pageSize: 10 }} scroll={{ x: 900 }} />
+        </div>
       </Card>
     </div>
   );

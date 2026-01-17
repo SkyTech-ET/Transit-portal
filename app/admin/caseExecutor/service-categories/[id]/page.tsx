@@ -86,10 +86,7 @@ export default function ServiceDetailPage({ params }: Props) {
     return map[stageEnumValue] || `Stage ${stageEnumValue}`;
   };
 
-  // Upload / Comment endpoints — adjust base if your API base is different.
-  // This uses the default Next/API-style absolute path starting with /api/v1/CaseExecutor...
-  // Your axios base may be https://localhost:5001/api/v1 — if so the fetch below will resolve relative to origin.
-  // If your frontend is served from a different origin, replace with full URL using your config.
+  
   const UPLOAD_URL = (serviceId: number, stageId: number) =>
     `/api/v1/CaseExecutor/services/${serviceId}/stages/${stageId}/documents`;
 

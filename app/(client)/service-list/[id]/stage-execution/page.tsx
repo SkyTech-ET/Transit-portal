@@ -138,32 +138,6 @@ export default function CustomerWorkflowPage({ params }: Props) {
   { comment: string; createdDate: string; isVisibleToCustomer: boolean }[]
   >([]);
 
-  
-
-
-
-
-  
-
-  /* useEffect(() => {
-    if (!serviceId) return;
-    getServiceById(serviceId).catch(() => {});
-    getServiceStages(serviceId).catch(() => {});
-  }, [serviceId, getServiceById, getServiceStages]); */
-
-  /* useEffect(() => {
-  if (!serviceId) return;
-
-  console.log("🔥 Calling backend with serviceId:", serviceId);
-
-  getServiceById(serviceId)
-    .then((res) => console.log("✅ getServiceById response:", res))
-    .catch((err) => console.log("❌ getServiceById ERROR:", err));
-
-  getServiceStages(serviceId)
-    .then((res) => console.log("✅ getServiceStages response:", res))
-    .catch((err) => console.log("❌ getServiceStages ERROR:", err));
-}, [serviceId]); */
 
 
 // At the top of your component
@@ -249,13 +223,13 @@ useEffect(() => {
   const stageOrder = useMemo(
     () => [
           ServiceStage.PrepaymentInvoice,
-          //ServiceStage.TransitPermission,
-          //ServiceStage.Amendment,
+          ServiceStage.TransitPermission,
+          ServiceStage.Amendment,
           ServiceStage.DropRisk,
           ServiceStage.DeliveryOrder,
           ServiceStage.WarehouseStatus,
           ServiceStage.Inspection,
-          //ServiceStage.AssessmentandTaxPayment,
+          ServiceStage.AssessmentandTaxPayment,
           ServiceStage.Emergency,
           ServiceStage.ExitandStoragePayment,
           ServiceStage.Transportation,
@@ -268,13 +242,13 @@ useEffect(() => {
 
   const stageLabels = [
     "Prepayment Invoice",
-    //"TransitPermission",
-    //"Amendment",
+    "TransitPermission",
+    "Amendment",
     "Drop Risk",
     "Delivery Order",
     "Warehouse Status",
     "Inspection",
-    //"Assessment & Tax Payment",
+    "Assessment & Tax Payment",
     "Spot",
     "Exit & Storage Payment",
     "Transportation",

@@ -14,7 +14,11 @@ import {
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 
-export default function AdminSideBar() {
+interface AdminSideBarProps {
+  onLinkClick?: () => void; // <- add this
+}
+
+export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -22,7 +26,10 @@ export default function AdminSideBar() {
     <Menu
       mode="inline"
       selectedKeys={[pathname]}
-      onClick={({ key }) => router.push(key)}
+      onClick={({ key }) => {
+        router.push(key);
+        if (onLinkClick) onLinkClick(); // <- call on mobile link click
+      }}
       style={{
         height: "100vh",
         borderRight: 0,
@@ -39,7 +46,6 @@ export default function AdminSideBar() {
           icon: <DashboardOutlined />,
           label: "Stage Overview",
         },
-
         {
           type: "group",
           label: "Management",
@@ -65,7 +71,7 @@ export default function AdminSideBar() {
               label: "Profile Settings",
             },
             {
-              key: "/admin/caseExecutor/service-categories",
+              key: "/admin/document",
               icon: <FolderOutlined />,
               label: "Documents",
             },
@@ -80,9 +86,8 @@ export default function AdminSideBar() {
               icon: <DashboardOutlined />,
               label: "Notifications",
             },
-      ],
+          ],
         },
-
         {
           type: "group",
           label: "Analytics",

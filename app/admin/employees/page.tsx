@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Card,
   Table,
@@ -10,10 +10,22 @@ import {
   Popconfirm,
   Drawer,
   Descriptions,
+  Avatar,
+  Skeleton,
 } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import { Eye, PencilLine, Trash2, Users, Plus } from "lucide-react";
 import { useUserStore } from "@/modules/user";
 import { useRouter } from "next/navigation";
+
+const BASEURL = "https://transitportal.skytechet.com";
+
+
+interface ExecutorInfo {
+  name: string;
+  photo?: string;
+}
+
 
 const EmployeeListPage = () => {
   const router = useRouter();
@@ -22,6 +34,13 @@ const EmployeeListPage = () => {
   const [search, setSearch] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerLoading, setDrawerLoading] = useState(false);
+  const userCache = useRef<Record<number, any>>({});
+
+  
+
+
+  const [serviceExecutorsMap, setServiceExecutorsMap] = useState<Record<number, ExecutorInfo[]>>({});
 
   // Employee role IDs
   const employeeRoles = [2, 4, 5];
@@ -45,14 +64,37 @@ const EmployeeListPage = () => {
   }, []);
 
   // Open drawer with selected employee
-  const handleView = (record: any) => {
+  /* const handleView = (record: any) => {
     setSelectedEmployee(record);
     setIsDrawerOpen(true);
-  };
+  }; */
 
-  // ---------------------------------------------------------
-  // 🔥 FIX: Consistent role checking and phone number display
-  // ---------------------------------------------------------
+  const handleView = async (record: any) => {
+  setSelectedEmployee(record);
+  setIsDrawerOpen(true);
+
+  if (userCache.current[record.id]) {
+    setSelectedEmployee(userCache.current[record.id]);
+    return;
+  }
+
+  setDrawerLoading(true);
+  const fullUser = await useUserStore.getState().getUser(record.id);
+
+  if (fullUser) {
+    userCache.current[record.id] = fullUser;
+    setSelectedEmployee(fullUser);
+  }
+
+  setDrawerLoading(false);
+};
+
+
+
+
+  
+  //  Consistent role checking and phone number display
+  
   
   // Filter employees + search
   const employees = users.filter((user) => {
@@ -75,16 +117,15 @@ const EmployeeListPage = () => {
     );
   });
 
-  // ---------------------------------------------------------
-  // 🔥 FIX: Phone number display with fallback
-  // ---------------------------------------------------------
+  //  Phone number display with fallback
+  
   const getPhoneNumber = (record: any) => {
     return record.phone || record.phoneNumber || record.mobile || record.telephone || "N/A";
   };
 
-  // ---------------------------------------------------------
-  // 🔥 FIX: Get roles for display (handle both data structures)
-  // ---------------------------------------------------------
+  
+  //  Get roles for display (handle both data structures)
+  
   const getEmployeeRoles = (user: any) => {
     // Check userRoles first (original structure)
     if (user.userRoles) {
@@ -97,6 +138,7 @@ const EmployeeListPage = () => {
     }
     
     // Check roles as fallback (newer structure)
+    
     if (user.roles) {
       return user.roles
         .filter((role: any) => employeeRoles.includes(role.id))
@@ -186,9 +228,9 @@ const EmployeeListPage = () => {
     },
   ];
 
-  // ---------------------------------------------------------
-  // 🔥 FIX: Safe date formatting
-  // ---------------------------------------------------------
+  
+  //  Safe date formatting
+  
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
     try {
@@ -198,20 +240,22 @@ const EmployeeListPage = () => {
     }
   };
 
-  // ---------------------------------------------------------
-  // 🔥 FIX: Safe profile photo URL
-  // ---------------------------------------------------------
+  
   const getProfilePhotoUrl = (employee: any) => {
-    if (!employee?.profilePhoto) {
-      return "/default-avatar.png"; // Fallback image
-    }
-    
-    if (employee.profilePhoto.startsWith('http')) {
-      return employee.profilePhoto;
-    }
-    
-    return `${process.env.NEXT_PUBLIC_API_URL}/${employee.profilePhoto}`;
-  };
+  if (!employee?.profilePhoto) {
+    return "/images/avatar-placeholder.png";
+  }
+
+  // Remove Windows backslashes safely
+  const fileName = employee.profilePhoto
+    .replace(/\\/g, "/")
+    .split("/")
+    .pop();
+
+  return `${BASEURL}/Profile_Photo/${fileName}`;
+};
+
+
 
   return (
     <div className="p-6">
@@ -279,26 +323,40 @@ const EmployeeListPage = () => {
             <div className="space-y-6">
               {/* Profile Section */}
               <div className="flex items-center gap-4">
-                <img
-                  src={getProfilePhotoUrl(selectedEmployee)}
-                  alt="profile"
-                  className="w-16 h-16 rounded-full object-cover border"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/default-avatar.png';
-                  }}
-                />
-                <div>
-                  <p className="text-lg font-semibold">
-                    {selectedEmployee.firstName} {selectedEmployee.lastName}
-                  </p>
-                  <p className="text-gray-500 text-sm">
-                    {selectedEmployee.username}
-                  </p>
-                  <p className="text-gray-500 text-sm">
-                    {selectedEmployee.email}
-                  </p>
-                </div>
-              </div>
+  {drawerLoading ? (
+    <Skeleton.Avatar
+      active
+      size={64}
+      shape="circle"
+    />
+  ) : (
+    <Avatar
+      size={64}
+      src={
+        selectedEmployee?.profilePhoto
+          ? `https://transitportal.skytechet.com/Profile_Photo/${selectedEmployee.profilePhoto
+              .replace(/\\/g, "/")
+              .split("/")
+              .pop()}`
+          : undefined
+      }
+      icon={<UserOutlined />}
+    />
+  )}
+
+  <div>
+    <p className="text-lg font-semibold">
+      {selectedEmployee.firstName} {selectedEmployee.lastName}
+    </p>
+    <p className="text-gray-500 text-sm">
+      {selectedEmployee.username}
+    </p>
+    <p className="text-gray-500 text-sm">
+      {selectedEmployee.email}
+    </p>
+  </div>
+</div>
+
 
               {/* Info Section */}
               <Descriptions column={1} bordered size="small">

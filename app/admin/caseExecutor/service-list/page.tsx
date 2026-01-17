@@ -52,9 +52,6 @@ export default function ServiceListPage() {
     );
   };
 
-  /* ----------------------------
-   * UI
-   * ---------------------------- */
   const roleLabel =
     user?.roles?.[0]?.roleName?.toLowerCase() === "caseexecutor"
       ? "Services assigned to you"
@@ -77,7 +74,7 @@ export default function ServiceListPage() {
           <div
             key={service.id}
             className="bg-white shadow rounded-xl p-6 border hover:shadow-md transition cursor-pointer"
-            onClick={() => goToStageExecution(service.id)}
+            onClick={() => goToStageExecution(service.id)} 
           >
             <h2 className="font-semibold text-lg">
               {service.serviceNumber}

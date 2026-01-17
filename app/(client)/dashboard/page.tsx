@@ -50,7 +50,7 @@ export default function ServiceListPage() {
   const [latestNotifications, setLatestNotifications] = useState<
     { id: number; title: string; description: string; createdDate: string }[]
     >([]);
-  
+   
 
   // Get logged-in customer
   const currentUser = useUserStore((state) => state.currentUser);

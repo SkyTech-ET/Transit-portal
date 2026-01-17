@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useServiceStore } from "@/modules/mot/service/service.store";
 import { IService, ServiceType } from "@/modules/mot/service/service.types";
 import { ServiceStatus } from "@/modules/mot/service/service.types";
@@ -9,6 +10,7 @@ import useAuthStore from "@/modules/auth/auth.store";
 
 
 export default function ServiceCategoriesPage() {
+  const router = useRouter();
   const { services, getAllServices, getAssignedServices, loading } = useServiceStore();
   const [mode, setMode] = useState<ServiceType>(1); // 1 = Multimodal
   const { user } = useAuthStore();
@@ -38,6 +40,12 @@ useEffect(() => {
     getAllServices(); // admin / manager / others
   }
 }, [hydrated, user?.id]);
+
+const goToStageExecution = (serviceId: number) => {
+    router.push(
+      `/admin/caseExecutor/service-categories/${serviceId}/stage-execution`
+    );
+  };
 
 
   const filtered = services.filter((s) => s.serviceType === mode);
@@ -87,6 +95,7 @@ useEffect(() => {
           <div
             key={service.id}
             className="bg-white rounded-xl shadow p-6 border hover:shadow-md transition cursor-pointer"
+            onClick={() => goToStageExecution(service.id)} 
           >
             {/* Placeholder image */}
             <div className="w-14 h-14 bg-gray-200 rounded-lg"></div>
