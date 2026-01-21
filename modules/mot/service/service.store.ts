@@ -112,8 +112,6 @@ export const useServiceStore = create<IServiceState & IServiceActions>((set, get
   }
 },
 
-
-
   updateService: async (id: number, payload: Partial<IServicePayload>) => {
     set({ loading: true, error: null });
     try {

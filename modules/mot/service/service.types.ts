@@ -108,7 +108,7 @@ export interface IStageDocument {
 }
 
 export interface IServicePayload {
-  serviceNumber: string;
+  serviceNumber?: string;
   itemDescription: string;
   routeCategory: string;
   declaredValue: number;

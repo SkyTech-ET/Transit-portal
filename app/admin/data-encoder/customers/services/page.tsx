@@ -15,7 +15,7 @@ const CustomerServicesPage = () => {
   });
 
   useEffect(() => {
-    getAllServices({ recordStatus: 2 });
+    getAllServices();
   }, [getAllServices]);
 
   const handleCreateService = () => {
@@ -82,7 +82,7 @@ const CustomerServicesPage = () => {
       title: "Created Date",
       dataIndex: "registeredDate",
       key: "registeredDate",
-      render: (d: string) => new Date(d).toLocaleString(),
+      render: (date: string) => new Date(date).toLocaleDateString(),
     },
     {
       title: "Actions",
@@ -97,13 +97,13 @@ const CustomerServicesPage = () => {
           >
             View
           </Button>
-          <Button
+          {/* <Button
             size="small"
             icon={<Edit size={14} />}
             onClick={() => handleEditService(record.id)}
           >
             Edit
-          </Button>
+          </Button> */}
           <Button
             danger
             size="small"
@@ -153,6 +153,3 @@ const CustomerServicesPage = () => {
 };
 
 export default CustomerServicesPage;
-
-
-

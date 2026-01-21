@@ -62,7 +62,7 @@ const CreateCustomerPage = () => {
     );
 
     await createCustomer(formData);
-    router.push("/admin/data-encoder/customers/customerList");
+    router.push("/admin/mot/customers");
   };
 
   const beforeUpload = () => false; // prevent auto upload

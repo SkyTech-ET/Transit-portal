@@ -32,9 +32,13 @@ export const createCustomer = async (formData: FormData) => {
   });
 };
 
-export const updateCustomer = async (payload: any) => {
+export const updateCustomer = async (formData: FormData) => {
   return http.put({
     url: "/DataEncoder/UpdateCustomer",
-    data: payload,
+    data: formData,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
   });
 };
+

@@ -39,24 +39,35 @@ export interface CustomerDTO {
   id: number;
   businessName: string;
   tinNumber: string;
-  businessLicense: string;
-  businessAddress: string;
-  city: string;
-  state: string;
-  postalCode: string;
+  businessLicense?: string;
+  businessAddress?: string;
+  taxDocumentation?: string;
+  identityProof?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  contactPerson?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  businessType?: string;
+  importLicense?: string;
+  importLicenseExpiry?: string | null;
+  isVerified?: boolean;
+  verifiedAt?: string | null;
+  verifiedByUserId?: number | null;
+  verificationNotes?: string | null;
+  userId?: number;
 
-  contactPerson: string;
-  contactPhone: string;
-  contactEmail: string;
+  user?: {
+    id: number;
+    username: string;
+    email: string;
+  };
 
-  businessType: string;
-  importLicense: string;
-  importLicenseExpiry: string;
-
-  isVerified: boolean;
-  verifiedAt: string | null;
-  verifiedByUserId: number | null;
-  verificationNotes: string | null;
-
-  userId: number;
+  ProfileFile?: File;
+  BusinessLicenseFile?: File;
+  BusinessAddressFile?: File;
+  TaxDocumentationFile?: File;
+  IdentityProofFile?: File;
 }
+

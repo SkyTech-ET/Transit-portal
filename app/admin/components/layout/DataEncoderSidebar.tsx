@@ -9,6 +9,7 @@ import {
   FolderOutlined,
   MessageOutlined,
   UploadOutlined,
+  EditOutlined
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -42,6 +43,11 @@ export default function DataEncoderSidebar() {
               label: "New Customer",
             },
             {
+              key: "/admin/mot/customers/update/[id]",
+              icon: <EditOutlined />,
+              label: "Update Customer",
+            },
+            {
               key: "/admin/data-encoder/customers/customerList",
               icon: <UnorderedListOutlined />,
               label: "Customer List",
@@ -53,11 +59,11 @@ export default function DataEncoderSidebar() {
           label: "Services",
           children: [
             {
-              key: "/admin/mot/services/create",
+              key: "/admin/data-encoder/customers/services",
               icon: <FileAddOutlined />,
-              label: "New Service",
+              label: "Service List",
             },
-            {
+            /* {
               key: "/admin/mot/services/drafts",
               icon: <FolderOutlined />,
               label: "Drafts",
@@ -66,7 +72,7 @@ export default function DataEncoderSidebar() {
               key: "/admin/mot/services",
               icon: <FolderOutlined />,
               label: "Submitted",
-            },
+            }, */
           ],
         },
         {
