@@ -69,17 +69,22 @@ const AccountDropdown = (props: { currentUser: IUser | null }) => {
     return (
         <>
             <Popover
-                open={open}
-                trigger="click"
-                content={content}
-                onOpenChange={handleOpenChange}
-            >
-                <Avatar
-                    className='cursor-pointer'
-                    size={{ xs: 28, sm: 28, md: 28, lg: 30, xl: 34, xxl: 50 }}
-                    icon={<UserOutlined />}
-                />
-            </Popover>
+  open={open}
+  trigger="click"
+  content={content}
+  onOpenChange={handleOpenChange}
+>
+  <Avatar
+    className="cursor-pointer"
+    size={{ xs: 28, sm: 28, md: 28, lg: 30, xl: 34, xxl: 50 }}
+    src={avatarUrl}                         // ✅ use profile image
+    icon={!avatarUrl && <UserOutlined />}   // ✅ fallback
+  >
+    {!avatarUrl &&
+      props.currentUser?.firstName?.charAt(0).toUpperCase()}
+  </Avatar>
+</Popover>
+
             <LoadingDialog visible={loading} />
         </>
     );
