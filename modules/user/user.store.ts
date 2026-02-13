@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { notification } from "antd";
 import { RecordStatus } from "../common/common.types";
 import { IAdditionalParam, IUserPayload, IUserState, IUserStore, IUser } from "./user.types";
-import { addUser, deleteUser, getUser, getUsers, getUsersByOrg, updateUser } from "./user.endpoint";
+import { addUser, deleteUser, getUser, getUsers, getUsersByOrg, updateUser  } from "./user.endpoint";
 import { checkFieldValue } from "../utils";
 
 

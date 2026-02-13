@@ -10,6 +10,7 @@ import { Tabs, TabsProps } from "antd";
 import VendorForm from "@/app/admin/vendor/components/VendorForm";
 import layout from "@/app/admin/dashboard/layout";
 
+
 interface Props {
     params: {
         id: number;

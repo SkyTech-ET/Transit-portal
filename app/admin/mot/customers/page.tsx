@@ -214,7 +214,7 @@ const getCustomerPhone = (record: any) => {
               </Button>
             )}
 
-            {!isCurrentUserCustomer && (
+            {/* {!isCurrentUserCustomer && (
               <Button
                 type="primary"
                 icon={<Plus size={16} />}
@@ -222,7 +222,7 @@ const getCustomerPhone = (record: any) => {
               >
                 Create Customer User
               </Button>
-            )}
+            )} */}
           </Space>
         }
       >

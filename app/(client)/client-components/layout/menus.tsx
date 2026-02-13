@@ -36,22 +36,22 @@ export default function CustomerSidebar() {
         {
           key: "/dashboard/service-requests",
           icon: <PieChartOutlined />,
-          label: "Service Request",
+          label: "Service",
         },
-        {
+        /* {
           key: "/dashboard/tax-information",
           icon: <PieChartOutlined />,
           label: "Tax Information",
-        },
+        }, */
         {
-          key: "/dashboard/notification",
-          icon: <NotificationOutlined />,
-          label: "Notification",
-        },
-        {
-          key: "/admin/customer/documents",
+          key: "/document",
           icon: <FileTextOutlined />,
           label: "Documents",
+        },
+        {
+          key: "/notification",
+          icon: <NotificationOutlined />,
+          label: "Notification",
         },
         {
           key: "/admin/customer/messages",

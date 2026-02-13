@@ -11,8 +11,15 @@ import {
   SafetyOutlined,
   UserOutlined,
   ProfileOutlined,
+  AppstoreOutlined,
+  TeamOutlined,
+  UsergroupAddOutlined,
+  SettingOutlined,
+  ClockCircleOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
+import Logo from "@/app/(client)/components/logo";
 
 interface AdminSideBarProps {
   onLinkClick?: () => void; // <- add this
@@ -23,6 +30,21 @@ export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
   const pathname = usePathname();
 
   return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        height: 100,
+        width: 240,        // important: fixed width
+        //overflowY: "auto", // scroll sidebar if menu is long
+        background: "#fff",
+        zIndex: 1000,
+      }}
+    >
+      <div className="flex ml-4 mt-4">
+            <Logo />
+          </div>
     <Menu
       mode="inline"
       selectedKeys={[pathname]}
@@ -33,7 +55,7 @@ export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
       style={{
         height: "100vh",
         borderRight: 0,
-        paddingTop: 8,
+        paddingTop: 40,
       }}
       items={[
         {
@@ -43,7 +65,7 @@ export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
         },
         {
           key: "/admin/dashboard/stage-overview",
-          icon: <DashboardOutlined />,
+          icon: <AppstoreOutlined />,
           label: "Stage Overview",
         },
         {
@@ -52,22 +74,29 @@ export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
           children: [
             {
               key: "/admin/employees",
-              icon: <UnorderedListOutlined />,
+              icon: <TeamOutlined />,
               label: "Staff Management",
             },
             {
               key: "/admin/mot/customers",
-              icon: <FolderOutlined />,
+              icon: <UserOutlined />,
               label: "Customer Management",
             },
             {
+              key: "/admin/user",
+              icon: <TeamOutlined />,
+              label: "System Users",
+            },
+          ],
+        },
+            {
               key: "/admin/caseExecutor/service-list",
-              icon: <UnorderedListOutlined />,
+              icon: <MessageOutlined />,
               label: "Communication",
             },
             {
               key: "/admin/user/profile/id",
-              icon: <FolderOutlined />,
+              icon: <SettingOutlined />,
               label: "Profile Settings",
             },
             {
@@ -75,15 +104,14 @@ export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
               icon: <FolderOutlined />,
               label: "Documents",
             },
-          ],
-        },
+         
         {
           type: "group",
           label: "Notifications",
           children: [
             {
               key: "/admin/dashboard/notification",
-              icon: <DashboardOutlined />,
+              icon: <BellOutlined />,
               label: "Notifications",
             },
           ],
@@ -99,12 +127,13 @@ export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
             },
             {
               key: "/case-executor/documents",
-              icon: <FileTextOutlined />,
+              icon: <HistoryOutlined />,
               label: "Activity Log",
             },
           ],
         },
       ]}
     />
+    </div>
   );
 }

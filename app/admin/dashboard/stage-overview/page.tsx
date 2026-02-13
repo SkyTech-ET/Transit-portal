@@ -10,32 +10,38 @@ import {
   Input,
   Avatar,
 } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import { UserOutlined, AppstoreOutlined  } from "@ant-design/icons";
 import { Eye } from "lucide-react";
 
 import { useServiceStore } from "@/modules/mot/service/service.store";
 import { useUserStore } from "@/modules/user";
 import { getServiceStatus } from "@/modules/mot/service/serviceStatus.util";
-import { StageStatus, ServiceType, IService } from "@/modules/mot/service/service.types";
+import { StageStatus, ServiceType, IService, ServiceStatus  } from "@/modules/mot/service/service.types";
 
 const BASEURL = "https://transitportal.skytechet.com";
 
-const statusLabelMap: Record<StageStatus, string> = {
-  [StageStatus.NotStarted]: "Not Started",
-  [StageStatus.Pending]: "Pending",
-  [StageStatus.InProgress]: "In Progress",
-  [StageStatus.Completed]: "Completed",
-  [StageStatus.Blocked]: "Blocked",
-  [StageStatus.NeedsReview]: "Needs Review",
+const serviceStatusLabelMap: Record<ServiceStatus, string> = {
+  [ServiceStatus.Draft]: "Draft",
+  [ServiceStatus.Submitted]: "Submitted",
+  [ServiceStatus.UnderReview]: "Under Review",
+  [ServiceStatus.Approved]: "Approved",
+  [ServiceStatus.InProgress]: "In Progress",
+  [ServiceStatus.Completed]: "Completed",
+  [ServiceStatus.Rejected]: "Rejected",
+  [ServiceStatus.Cancelled]: "Cancelled",
+  [ServiceStatus.Pending]: "Pending",
 };
 
-const statusColorMap: Record<StageStatus, string> = {
-  [StageStatus.NotStarted]: "default",
-  [StageStatus.Pending]: "orange",
-  [StageStatus.InProgress]: "blue",
-  [StageStatus.Completed]: "green",
-  [StageStatus.Blocked]: "red",
-  [StageStatus.NeedsReview]: "purple",
+const serviceStatusColorMap: Record<ServiceStatus, string> = {
+  [ServiceStatus.Draft]: "default",
+  [ServiceStatus.Submitted]: "blue",
+  [ServiceStatus.UnderReview]: "orange",
+  [ServiceStatus.Approved]: "cyan",
+  [ServiceStatus.InProgress]: "gold",
+  [ServiceStatus.Completed]: "green",
+  [ServiceStatus.Rejected]: "red",
+  [ServiceStatus.Cancelled]: "volcano",
+  [ServiceStatus.Pending]: "purple",
 };
 
 const roleStyleMap: Record<
@@ -81,7 +87,6 @@ export default function ServiceRequestsPage() {
 
   const [search, setSearch] = useState("");
   const [staffSearch, setStaffSearch] = useState("");
-  const [serviceStatusMap, setServiceStatusMap] = useState<Record<number, StageStatus>>({});
   const [customerMap, setCustomerMap] = useState<Record<number, CustomerInfo>>({});
   const [serviceExecutorsMap, setServiceExecutorsMap] = useState<Record<number, ExecutorInfo[]>>({});
   const [employeeStageMap, setEmployeeStageMap] = useState<Record<number, { stageName: string; lastUpdated?: string }>>({});
@@ -133,9 +138,6 @@ export default function ServiceRequestsPage() {
           };
         }
 
-        // Status
-        serviceStatusMapLocal[service.id] = getServiceStatus(stages);
-
         // Customer
         if (service.customerId && userMap[service.customerId]) {
           const customer = userMap[service.customerId];
@@ -167,7 +169,6 @@ export default function ServiceRequestsPage() {
       setServiceExecutorsMap(executorsMapLocal);
       setEmployeeStageMap(employeeStageMapLocal);
       setCurrentStageMap(currentStageMapLocal);
-      setServiceStatusMap(serviceStatusMapLocal);
 
     } catch (err) {
       console.error("Error loading stage-overview page data:", err);
@@ -267,13 +268,19 @@ const filteredStaff = employeeUsers.filter((staff: any) => {
       render: (d: string) => new Date(d).toLocaleString(),
     },
     {
-      title: "Status",
-      key: "status",
-      render: (_: any, record: IService) => {
-        const status = serviceStatusMap[record.id] ?? StageStatus.NotStarted;
-        return <Tag color={statusColorMap[status]}>{statusLabelMap[status]}</Tag>;
-      },
-    },
+  title: "Status",
+  key: "status",
+  render: (_: any, record: IService) => {
+    const status = record.status as ServiceStatus;
+
+    return (
+      <Tag color={serviceStatusColorMap[status]}>
+        {serviceStatusLabelMap[status]}
+      </Tag>
+    );
+  },
+},
+
     {
       title: "Case Executor",
       key: "assignedCaseExecutor",
@@ -384,7 +391,7 @@ const filteredStaff = employeeUsers.filter((staff: any) => {
         extra={<Input placeholder="Search services..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', maxWidth: 240 }} allowClear />}
       >
         <div className="overflow-x-auto">
-          <Table rowKey="id" columns={serviceColumns} dataSource={filteredServices} loading={loading} pagination={{ pageSize: 10 }} scroll={{ x: 1000 }} />
+          <Table rowKey="id" columns={serviceColumns} dataSource={filteredServices} loading={loading} pagination={{ pageSize: 5 }} scroll={{ x: 1000 }} />
         </div>
       </Card>
 
@@ -393,7 +400,7 @@ const filteredStaff = employeeUsers.filter((staff: any) => {
         extra={<Input placeholder="Search staff..." value={staffSearch} onChange={e => setStaffSearch(e.target.value)} style={{ width: '100%', maxWidth: 200 }} allowClear />}
       >
         <div className="overflow-x-auto">
-          <Table rowKey="id" columns={stageColumns} dataSource={filteredStaff} pagination={{ pageSize: 10 }} scroll={{ x: 900 }} />
+          <Table rowKey="id" columns={stageColumns} dataSource={filteredStaff} pagination={{ pageSize: 5 }} scroll={{ x: 900 }} />
         </div>
       </Card>
     </div>

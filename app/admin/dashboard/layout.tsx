@@ -15,8 +15,7 @@ export default function AdminSideLayout({
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
       <div
-        className={`fixed sm:static z-50 h-full bg-white border-r border-gray-200 transform transition-transform duration-300
-          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} sm:translate-x-0 w-64`}
+        className="fixed sm:static h-full bg-white border-r border-gray-200 sm: w-64"
       >
         <AdminSideBar onLinkClick={() => setSidebarOpen(false)} />
       </div>

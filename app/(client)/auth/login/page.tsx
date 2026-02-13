@@ -8,6 +8,9 @@ import { Button, Card, Form, Input } from "antd";
 import useAuthStore from "@/modules/auth/auth.store";
 import { CardTitle } from "../../components/card_title";
 import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
+import Logo from "../../components/logo";
+import Image from "next/image";
+
 
 export default function LoginPage() {
 
@@ -51,78 +54,101 @@ export default function LoginPage() {
   }, [user, router]);
 
   return (
-    <div className="flex flex-col items-center md:pt-28 pt-8">
-      <div className="md:px-0 px-16">
-        <Card
-          style={{ minWidth: 440, minHeight: 450, backgroundColor: "#FDFEFE" }}
-          styles={{ body: { padding: 40 } }}
-        >
-          <div className="text-start">
-            <CardTitle
-              title={"Sign In"}
-              subTitle={
-                "To access your account, please enter your login credentials."
-              }
-            />
+  <div className="flex min-h-screen items-center justify-center bg-slate-100">
+
+    {/* MAIN WRAPPER (ONE CONTAINER) */}
+    <div className="flex w-[1100px] h-[620px] rounded-2xl overflow-hidden bg-white shadow-2xl">
+
+      {/* LEFT SIDE – IMAGE */}
+      <div className="hidden lg:flex w-1/2 items-center justify-center bg-white">
+        <Image
+          src="/login_image.png"
+          alt="Import Export Illustration"
+          width={700}
+          height={500}
+          priority
+          className="object-contain"
+        />
+      </div>
+
+      {/* RIGHT SIDE – LOGIN FORM */}
+      <div className="flex w-full lg:w-1/2 items-center justify-center bg-[#0b3442]">
+
+        <div className="w-full max-w-md px-10">
+
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <Logo />
           </div>
+
+          {/* Title */}
+          <h2 className="text-3xl font-bold text-white mb-8">
+            Sign in
+          </h2>
+
+          {/* FORM */}
           <Form
             form={form}
             name="login"
             onFinish={onLogin}
             autoComplete="off"
-            labelCol={{ span: 24 }}
-            requiredMark={"optional"}
+            layout="vertical"
           >
+            {/* Username */}
             <Form.Item
               name="username"
-              label={<span className="font-semibold">Username</span>}
+              label={<span className="text-white/80">Email</span>}
               rules={[{ required: true, message: "Please input your username!" }]}
-              labelCol={{ span: 24 }}
             >
               <Input
-                prefix={<UserOutlined />}
-                suffix={<MailOutlined />}
-                placeholder="Email/Username"
-                style={{ padding: "10px", paddingLeft: "10px", marginTop: "1px" }}
-                variant="filled"
+                prefix={<MailOutlined className="text-white/40" />}
+                placeholder="Enter your email"
+                className="h-11 rounded-md bg-transparent text-white placeholder:text-white/40 border border-white/40 focus:border-white/40 focus:shadow-none hover:border-white/40"
               />
             </Form.Item>
 
+            {/* Password */}
             <Form.Item
               name="password"
-              label={<span className="font-semibold">Password</span>}
+              label={<span className="text-white/80">Password</span>}
               rules={[{ required: true, message: "Please input your password!" }]}
-              labelCol={{ span: 24 }}
             >
               <Input.Password
-                prefix={<LockOutlined />}
-                placeholder="Password"
-                style={{ padding: "10px", paddingLeft: "10px" }}
-                variant="filled"
-                className="bg-gray-100 focus:bg-slate-300"
+                prefix={<LockOutlined className="text-white/40" />}
+                placeholder="Enter your password"
+                className="h-11 rounded-lg bg-[#124a5d] text-white placeholder:text-white/40 border-none"
               />
             </Form.Item>
-            <div className="flex justify-end pb-2">
-              <ForgotPassword onForgotPassword={() => router.push(authRoutes.forgot_password)} />
-            </div>
-            <Form.Item wrapperCol={{ span: 24 }}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={loading}
-                disabled={loading}
-                block
-                style={{ width: "100%", height: "2.4rem" }}
+
+            {/* Forgot password */}
+            <div className="flex justify-end mb-6">
+              <button
+                type="button"
+                onClick={() => router.push(authRoutes.forgot_password)}
+                className="text-white/80 hover:text-white text-sm"
               >
-                Login
-              </Button>
-            </Form.Item>
+                Forgot Password
+              </button>
+            </div>
+
+            {/* Submit */}
+            <Button
+              htmlType="submit"
+              loading={loading}
+              disabled={loading}
+              block
+              className="h-11 rounded-lg bg-[#2b7da3] border-none text-white font-medium hover:bg-[#256c8d]"
+            >
+              Sign in
+            </Button>
           </Form>
-          {/* <SignUp onSignUp={() => { router.push(authRoutes.signup) }} /> */}
-        </Card>
+        </div>
       </div>
     </div>
-  );
+  </div>
+);
+
+
 }
 
 interface ForgotPasswordProps {

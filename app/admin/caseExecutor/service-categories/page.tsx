@@ -50,11 +50,11 @@ export default function ServiceCategoriesPage() {
       `/admin/caseExecutor/service-categories/${serviceId}/stage-execution`
     );
   };
-const goToStageExecution = (serviceId: number) => {
+/* const goToStageExecution = (serviceId: number) => {
     router.push(
       `/admin/caseExecutor/service-categories/${serviceId}/stage-execution`
     );
-  };
+  }; */
 
 
   const filtered = services.filter((s) => s.serviceType === mode);
@@ -102,12 +102,12 @@ const goToStageExecution = (serviceId: number) => {
             transition
             ${
               mode === ServiceType.Unimodal
-                ? "bg-black text-white shadow"
+                ? "bg-blue-600 text-white shadow"
                 : "bg-white border text-gray-700"
             }
           `}
         >
-          📄 Unimodal Service
+          🔗 Unimodal Service
         </button>
       </div>
 
@@ -148,10 +148,9 @@ const goToStageExecution = (serviceId: number) => {
               flex
               flex-col
             "
-            onClick={() => goToStageExecution(service.id)} 
           >
             {/* Icon */}
-            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-200 rounded-lg" />
+            {/* <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-200 rounded-lg" /> */}
 
             {/* Service Number */}
             <h2 className="mt-4 font-semibold text-base sm:text-lg break-words">
@@ -217,6 +216,7 @@ const goToStageExecution = (serviceId: number) => {
           found.
         </p>
       )}
+      
     </div>
   );
 }

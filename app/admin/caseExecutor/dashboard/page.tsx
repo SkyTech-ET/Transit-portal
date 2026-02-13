@@ -86,9 +86,9 @@ export default function DashboardPage() {
           <h3 className="font-semibold text-[clamp(1rem,2vw,1.25rem)]">
             Work Summary
           </h3>
-          <span className="text-blue-600 text-sm font-medium cursor-pointer">
+          {/* <span className="text-blue-600 text-sm font-medium cursor-pointer">
             View Detailed Summary →
-          </span>
+          </span> */}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
@@ -202,7 +202,7 @@ function ServiceCard({
       </div>
 
       <p className="text-gray-600 text-sm sm:text-base mt-2">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+         Type specific services
       </p>
 
       {/* RESPONSIVE BUTTON TEXT */}
