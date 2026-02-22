@@ -57,7 +57,7 @@ export default function CaseExecutorSidebar() {
           label: "Documents",
           children: [
             {
-              key: "/admin/document",
+              key: "/admin/caseExecutor/document",
               icon: <FileTextOutlined />,
               label: "Document Center",
             },

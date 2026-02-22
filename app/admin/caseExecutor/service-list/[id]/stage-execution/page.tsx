@@ -33,7 +33,7 @@ export default function StageExecutionPage({ params }: Props) {
   const [stageFiles, setStageFiles] = useState<Record<number, File | null>>({});
   const [stageComments, setStageComments] = useState<Record<number, string>>({});
   const [uploading, setUploading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [savingStage, setSavingStage] = useState<number | null>(null);
 
   const [docsModalVisible, setDocsModalVisible] = useState(false);
   const [selectedDocs, setSelectedDocs] = useState<IStageDocument[]>([]);
@@ -161,7 +161,7 @@ const uploadStageFile = async (stageEnum: ServiceStage) => {
 
     if (!stageExec) return;
 
-    setSaving(true);
+    setSavingStage(stageEnum);
 
     try {
     // 1️⃣ Upload document IF selected
@@ -212,7 +212,7 @@ const uploadStageFile = async (stageEnum: ServiceStage) => {
     console.error(err);
     antdMessage.error("Failed to save stage");
   } finally {
-    setSaving(false);
+    setSavingStage(null);
   }
 };
 
@@ -703,7 +703,7 @@ const renderDocsForStage = (stageExec: IServiceStageExecution | null, stageTitle
 
             {/* Save & Next */}
             <div>
-              <Button type="primary" onClick={async () => { await postStageComment(stage); }} loading={saving}>
+              <Button type="primary" onClick={async () => { await postStageComment(stage); }} loading={savingStage === stage}>
                 Save & Next
               </Button>
             </div>

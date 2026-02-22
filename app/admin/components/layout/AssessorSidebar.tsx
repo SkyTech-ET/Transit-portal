@@ -18,7 +18,7 @@ const items = [
   { key: "/admin/assessor/service-requests", icon: <FileSearchOutlined />, label: "Service Requests" },
   { key: "/admin/assessor/service-list", icon: <UnorderedListOutlined />, label: "Service List" },
   { key: "/admin/assessor/messages", icon: <MessageOutlined />, label: "Messages" },
-  { key: "/admin/assessor/document-viewer", icon: <FileTextOutlined />, label: "Document Viewer" },
+  { key: "/admin/assessor/document", icon: <FileTextOutlined />, label: "Document Viewer" },
   { key: "/admin/assessor/assessment-logs", icon: <BellOutlined />, label: "Assessment Logs" },
 ];
 

@@ -96,6 +96,11 @@ export default function DataEncoderSidebar() {
           label: "Tools",
           children: [
             {
+              key: "/admin/data-encoder/document",
+              icon: <UploadOutlined />,
+              label: "Documents",
+            },
+            {
               key: "/admin/mot/bulk-upload",
               icon: <UploadOutlined />,
               label: "Bulk Upload",
