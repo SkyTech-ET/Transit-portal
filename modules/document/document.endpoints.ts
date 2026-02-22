@@ -8,8 +8,12 @@ export const uploadServiceDocument = async (formData: FormData) =>
     headers: { "Content-Type": "multipart/form-data" },
   });
 
-export const getServiceDocuments = async (serviceId: number) =>
-  http.get({ url: "/Document/GetServiceDocuments", params: { serviceId } });
+export const getServiceDocuments = (serviceId: number) => {
+  return http.get({
+    url: "/Document/GetServiceDocuments",
+    params: { serviceId },
+  });
+};
 
 export const deleteDocument = async (documentId: number) =>
   http.delete({

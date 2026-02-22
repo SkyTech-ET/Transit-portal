@@ -13,17 +13,35 @@ export interface DocumentUI {
   status: "Pending" | "Approved";
 }
 
+export interface ServiceDocumentsGroup {
+  serviceId: number;
+  serviceName: string;
+  documents: DocumentUI[];
+}
+
 interface DocumentState {
   documents: DocumentUI[];
+
+  // ✅ NEW: grouped documents for customer view
+  serviceDocuments: ServiceDocumentsGroup[];
+
   loading: boolean;
+
   fetchDocuments: (serviceId: number) => Promise<void>;
+
+  // ✅ NEW: fetch documents for MANY services
+  fetchDocumentsForServices: (
+    services: { id: number; name: string }[]
+  ) => Promise<void>;
+
   removeDocument: (id: number) => Promise<void>;
 }
 
 export const useDocumentStore = create<DocumentState>((set) => ({
   documents: [],
+  serviceDocuments: [],
   loading: false,
-
+  
   fetchDocuments: async (serviceId: number) => {
     set({ loading: true });
     try {
@@ -54,6 +72,42 @@ export const useDocumentStore = create<DocumentState>((set) => ({
       });
     }
   },
+
+  fetchDocumentsForServices: async (services) => {
+  const grouped: ServiceDocumentsGroup[] = [];
+
+  for (const service of services) {
+    try {
+      console.log("📡 Fetching documents for service:", service.id);
+
+      const res = await getServiceDocuments(service.id);
+
+      console.log("📦 RAW RESPONSE:", res);
+
+      const documents = res || [];
+
+      grouped.push({
+        serviceId: service.id,
+        serviceName: service.name,
+        documents,
+      });
+
+      console.log(
+        `✅ Loaded ${documents.length} documents for service ${service.id}`
+      );
+    } catch (err) {
+      console.error("❌ Failed to fetch docs for service", service.id, err);
+
+      grouped.push({
+        serviceId: service.id,
+        serviceName: service.name,
+        documents: [],
+      });
+    }
+  }
+
+  set({ serviceDocuments: grouped });
+},
 
   removeDocument: async (id) => {
     try {
