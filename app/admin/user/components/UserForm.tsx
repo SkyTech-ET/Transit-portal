@@ -11,6 +11,7 @@ import { Button, Form, Input, Radio, Select, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { RecordStatus } from '@/modules/common/common.types';
 import { usePermissionStore } from '@/modules/utils/permission/permission.store';
+import { ArrowLeft } from "lucide-react";
 
 
 interface UserFormProps {
@@ -141,6 +142,16 @@ const UserForm = (props: UserFormProps) => {
 
 
     return (<>
+    {/* Top Action Bar */}
+    <div className="flex justify-end items-center mb-1 mr-4">
+      <Button
+        icon={<ArrowLeft size={16} />}
+        onClick={() => router.back()}
+        className="flex items-center"
+      >
+        Back
+      </Button>
+    </div>
         <Form
             form={form}
             ref={formRef}
@@ -154,7 +165,7 @@ const UserForm = (props: UserFormProps) => {
             labelCol={{ span: 24 }}
             requiredMark={true}
         >
-            <div className="flex flex-col  w-full ">
+            <div className="flex flex-col  ml-20 mr-4 ">
                 {/* Name */}
                 <div className="flex flex-row space-x-4">
                     <Form.Item

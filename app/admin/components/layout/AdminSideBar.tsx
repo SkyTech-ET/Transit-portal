@@ -89,11 +89,11 @@ export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
             },
           ],
         },
-            {
+            /* {
               key: "/admin/caseExecutor/service-list",
               icon: <MessageOutlined />,
               label: "Communication",
-            },
+            }, */
             {
               key: "/admin/user/profile/id",
               icon: <SettingOutlined />,
@@ -116,7 +116,7 @@ export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
             },
           ],
         },
-        {
+        /* {
           type: "group",
           label: "Analytics",
           children: [
@@ -131,7 +131,7 @@ export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
               label: "Activity Log",
             },
           ],
-        },
+        }, */
       ]}
     />
     </div>

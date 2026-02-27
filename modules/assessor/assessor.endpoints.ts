@@ -29,9 +29,6 @@ export const getPendingServiceReviews = async () => {
 };
 
 
-
-
-
 export const reviewService = async (payload: any) =>
   http.put({ url: "/Assessor/ReviewService", data: payload });
 
@@ -69,5 +66,17 @@ export const requestCustomerRevision = async (
       id: approvalId,
       notes,
     },
+  });
+};
+
+export const assignServiceApi = async (payload: {
+  serviceId: number;
+  assignedCaseExecutorId: number;
+  assignedAssessorId: number;
+  assignmentNotes?: string | null;
+}) => {
+  return http.post ({
+    url: "/Service/Assign",
+    data: payload,
   });
 };

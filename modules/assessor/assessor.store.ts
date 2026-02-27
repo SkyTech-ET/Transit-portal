@@ -9,6 +9,7 @@ import {
   addComplianceFeedback,
   rejectCustomer as apiRejectCustomer,
   requestCustomerRevision as apiRequestCustomerRevision,
+  assignServiceApi 
 
 } from "@/modules/assessor/assessor.endpoints";
 
@@ -216,3 +217,31 @@ requestRevision: async (customerId: number, notes: string) => {
     }
   },
 }));
+
+
+assignService: async (payload: {
+  serviceId: number;
+  assignedCaseExecutorId: number;
+  assignedAssessorId: number;
+  assignmentNotes?: string | null;
+}) => {
+  set({ loading: true });
+  try {
+    const updated = await assignServiceApi(payload);
+
+    set({ currentService: updated, loading: false });
+
+    notification.success({
+      message: "Service Assigned",
+      description: "Service assigned successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    set({ loading: false });
+    notification.error({
+      message: "Error",
+      description: "Failed to assign service",
+    });
+    throw err;
+  }
+};

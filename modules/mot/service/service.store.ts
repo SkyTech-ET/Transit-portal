@@ -25,7 +25,8 @@ import {
   addStageComment as apiAddStageComment,
   uploadCustomerStageDocument as apiUploadCustomerStageDocument,
   createStageTransport,
-  getStageTransportsByStageId } from "./service.endpoints";
+  getStageTransportsByStageId, 
+  assignService as apiAssignService } from "./service.endpoints";
 
 import http from "@/modules/utils/axios";
 import { comment } from "postcss";
@@ -533,9 +534,37 @@ set({
   }
 },
 
+assignService: async (payload: {
+  serviceId: number;
+  assignedCaseExecutorId: number;
+  assignedAssessorId: number;
+  assignmentNotes?: string | null;
+}) => {
+  set({ loading: true });
+  try {
+    const updated = await apiAssignService(payload);
+
+    set({ currentService: updated, loading: false });
+
+    notification.success({
+      message: "Service Assigned",
+      description: "Service assigned successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    set({ loading: false });
+    notification.error({
+      message: "Error",
+      description: "Failed to assign service",
+    });
+    throw err;
+  }
+},
+
   
 
   setLoading: (loading: boolean) => set({ loading }),
   setError: (error: string | null) => set({ error }),
   setCurrentService: (service: IService | null) => set({ currentService: service })
 }));
+

@@ -185,9 +185,19 @@ export const getStageTransportById = (id: number) =>
   });
 
 
+  export const assignService = async (payload: {
+  serviceId: number;
+  assignedCaseExecutorId: number;
+  assignedAssessorId: number;
+  assignmentNotes?: string | null;
+}) => {
+  const res = await http.put({
+    url: "/Service/Assign",
+    data: payload,
+  });
 
-
-
+  return res;
+};
 
 
 

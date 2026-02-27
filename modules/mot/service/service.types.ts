@@ -120,6 +120,13 @@ export interface IServicePayload {
   assignedAssessorId?: number;
 }
 
+export interface IServiceAssignmentPayload {
+  serviceId: number;
+  assignedCaseExecutorId: number;
+  assignedAssessorId: number;
+  assignmentNotes?: string | null;
+}
+
 export interface IServiceState {
   services: IService[];
   currentService: IService | null;
@@ -142,7 +149,8 @@ export interface IServiceActions {
   updateService: (id: number, payload: Partial<IServicePayload>) => Promise<void>;
   deleteService: (id: number) => Promise<void>;
   updateServiceStatus: (id: number, status: ServiceStatus) => Promise<void>;
-  assignService: (id: number, userId: number, role: 'caseExecutor' | 'assessor') => Promise<void>;
+  /* assignService: (serviceId: number, assignedCaseExecutorId: number, assignedAssessorId: number, assignmentNotes?: string | null) => Promise<void>; */
+  assignService: (payload: IServiceAssignmentPayload) => Promise<void>;
   getServiceStages: (serviceId: number) => Promise<void>;
   updateStageStatus: (stageId: number, status: StageStatus, comments?: string | null) => Promise<void>;
   getMyServices: (status?: number) => Promise<void>;

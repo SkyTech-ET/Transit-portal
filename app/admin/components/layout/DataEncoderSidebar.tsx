@@ -43,7 +43,7 @@ export default function DataEncoderSidebar() {
               label: "New Customer",
             },
             {
-              key: "/admin/mot/customers/update/[id]",
+              key: "/admin/data-encoder/customers/update/[id]",
               icon: <EditOutlined />,
               label: "Update Customer",
             },
@@ -82,12 +82,7 @@ export default function DataEncoderSidebar() {
             {
               key: "/admin/chat/group",
               icon: <MessageOutlined />,
-              label: "Group Chat",
-            },
-            {
-              key: "/admin/chat/direct",
-              icon: <MessageOutlined />,
-              label: "Direct Messages",
+              label: "Chat",
             },
           ],
         },

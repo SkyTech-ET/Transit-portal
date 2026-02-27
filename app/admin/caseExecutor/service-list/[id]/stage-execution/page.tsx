@@ -128,6 +128,8 @@ const displayedStages: IServiceStageExecution[] = stages.filter((s) => {
   return s.stage !== ServiceStage.LocalPermission && s.stage !== ServiceStage.Arrival; // skip 12 & 13 for multimodal
 });
 
+const BASE_URL = "https://transitportal.skytechet.com";
+
 
 
 const uploadStageFile = async (stageEnum: ServiceStage) => {
@@ -206,7 +208,7 @@ const uploadStageFile = async (stageEnum: ServiceStage) => {
     setStageFiles(prev => ({ ...prev, [stageEnum]: null }));
     setStageComments(prev => ({ ...prev, [stageEnum]: "" }));
 
-    antdMessage.success("Stage saved successfully");
+    //antdMessage.success("Stage saved successfully");
     
   } catch (err: any) {
     console.error(err);
@@ -711,6 +713,8 @@ const renderDocsForStage = (stageExec: IServiceStageExecution | null, stageTitle
         );
       })}
 
+      
+
 
 <Modal
   open={docsModalVisible}
@@ -718,20 +722,29 @@ const renderDocsForStage = (stageExec: IServiceStageExecution | null, stageTitle
   footer={null}
   title={`Documents - ${selectedStageTitle}`}
 >
+  
   {selectedDocs.map((d) => (
     <div key={d.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, padding: 8, background: "#fbfbfd", borderRadius: 6 }}>
       <div>
         <div style={{ fontWeight: 600 }}>{d.originalFileName ?? d.fileName}</div>
         <div style={{ color: "#6b7280", fontSize: 12 }}>
-          {new Date(d.uploadedDate).toLocaleString()} • {d.uploadedByUserId === user?.id ? "CaseExecutor" : "Customer"}
+          {/* {new Date(d.uploadedDate).toLocaleString()} */} • {d.uploadedByUserId === user?.id ? "Customer" : "CaseExecutor"}
         </div>
       </div>
-      <Button
-        type="link"
-        onClick={() => downloadStageDocument(d.id, d.originalFileName ?? d.fileName)}
-      >
-        Download
-      </Button>
+      {
+  d.filePath ? (() => {
+    // Normalize Windows backslashes → URL format
+    const fileUrl = `${BASE_URL}/${d.filePath.replace(/\\/g, "/")}`;
+
+    return (
+      <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+        View
+      </a>
+    );
+  })() : (
+    <span>No File</span>
+  )
+}
     </div>
   ))}
 </Modal>

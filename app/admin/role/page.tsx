@@ -11,6 +11,7 @@ import { RecordStatus } from "@/modules/common/common.types";
 import permission from "@/modules/utils/permission/permission";
 import RecordStatusFilter from "../components/common/CommonTag";
 import { usePermissionStore } from "@/modules/utils/permission/permission.store";
+import { ArrowLeft } from "lucide-react";
 
 const RolePage = () => {
   const [status, setStatus] = useState<RecordStatus>(RecordStatus.Active);
@@ -29,20 +30,34 @@ const RolePage = () => {
 
   return (
     <div className="flex flex-col gap-4 rounded-md bg-white py-6">
-      <div className="flex px-6">
-        <h1 className="text-lg font-bold">Roles</h1>
-        {
-          checkPermission(permissions, permission.role.create) &&
-          <Button
-            type="primary"
-            icon={<PlusCircleOutlined />}
-            className="ml-auto"
-            onClick={handleAdd}
-          >
-            New Role
-          </Button>
-        }
-      </div>
+      <div className="flex items-center px-6">
+  <h1 className="text-lg font-bold">Roles</h1>
+
+  {/* Right-side actions */}
+  <div className="ml-auto flex items-center gap-2">
+
+    {checkPermission(permissions, permission.role.create) && (
+      <Button
+        type="primary"
+        icon={<PlusCircleOutlined />}
+        onClick={handleAdd}
+      >
+        New Role
+      </Button>
+    )}
+    
+    <Button
+      icon={<ArrowLeft size={16} />}
+      onClick={() => router.back()}
+      className="flex items-center"
+    >
+      Back
+    </Button>
+
+  </div>
+</div>
+
+
       <RecordStatusFilter status={status} onFilter={handleFilter} />
       <RoleTable
         loading={loading}

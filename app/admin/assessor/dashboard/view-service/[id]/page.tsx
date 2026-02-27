@@ -8,6 +8,8 @@ import { useDocumentStore } from "@/modules/mot/document";
 import { useRouter, useParams } from "next/navigation";
 import { usePermissionStore } from "@/modules/utils";
 import permission from "@/modules/utils/permission/permission";
+import { useUserStore } from "@/modules/user";
+import { RecordStatus } from "@/modules/common/common.types";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -20,7 +22,12 @@ const ServiceDetailPage = () => {
   
   const { currentService, loading, getServiceById, getServiceStages, updateStageStatus, assignService } = useServiceStore();
   const { documents, uploadDocument, downloadDocument } = useDocumentStore();
-  const { checkPermission, permissions, currentUser } = usePermissionStore();
+  const { checkPermission, permissions, /* currentUser */ } = usePermissionStore();
+  const { getUsers, users, currentUser } = useUserStore();
+
+  const caseExecutors = users.filter((u: any) =>
+  u.roles?.some((r: any) => r === 4 || r.id === 4)
+    );
   
   const [activeTab, setActiveTab] = useState("overview");
   const [stageModalVisible, setStageModalVisible] = useState(false);
@@ -39,6 +46,20 @@ const ServiceDetailPage = () => {
     await getServiceById(serviceId);
     await getServiceStages(serviceId);
   };
+
+  useEffect(() => {
+  if (assignModalVisible) {
+    getUsers(RecordStatus.Active, 1);
+  }
+}, [assignModalVisible]);
+
+useEffect(() => {
+  if (assignModalVisible && currentUser) {
+    assignForm.setFieldsValue({
+      assignedAssessorId: currentUser.id,
+    });
+  }
+}, [assignModalVisible, currentUser]);
 
   const getStatusColor = (status: ServiceStatus) => {
     const colors = {
@@ -86,15 +107,22 @@ const ServiceDetailPage = () => {
   };
 
   const handleAssign = async (values: any) => {
-    try {
-      await assignService(serviceId, values.userId, values.role);
-      setAssignModalVisible(false);
-      assignForm.resetFields();
-      await loadServiceData();
-    } catch (error) {
-      message.error('Failed to assign service');
-    }
-  };
+  try {
+    await assignService({
+      serviceId,
+      assignedCaseExecutorId: values.assignedCaseExecutorId,
+      assignedAssessorId: values.assignedAssessorId,
+      assignmentNotes: values.assignmentNotes ?? null,
+    });
+
+    message.success("Service assigned successfully");
+    setAssignModalVisible(false);
+    assignForm.resetFields();
+    await loadServiceData();
+  } catch {
+    message.error("Failed to assign service");
+  }
+};
 
   const handleUpload = async (file: File) => {
     try {
@@ -360,14 +388,14 @@ const ServiceDetailPage = () => {
   </div>
 
   {/* Right Side (Back Button) */}
-  <Button
+  {/* <Button
     icon={<ArrowLeft />}
     onClick={() => router.back()}
   >
     Back
-  </Button>
+  </Button> */}
 
-        {/* <Space>
+         <Space>
           {checkPermission(permissions, permission.motService.assign) && (
             <Button
               type="primary"
@@ -376,7 +404,7 @@ const ServiceDetailPage = () => {
               Assign Service
             </Button>
           )}
-        </Space> */}
+        </Space> 
       </div>
 
       <Tabs
@@ -447,42 +475,74 @@ const ServiceDetailPage = () => {
         }}
         footer={null}
       >
-        <Form
-          form={assignForm}
-          layout="vertical"
-          onFinish={handleAssign}
-        >
-          <Form.Item
-            name="role"
-            label="Role"
-            rules={[{ required: true }]}
-          >
-            <Select>
-              <Option value="caseExecutor">Case Executor</Option>
-              <Option value="assessor">Assessor</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name="userId"
-            label="User"
-            rules={[{ required: true }]}
-          >
-            <Input type="number" placeholder="Enter user ID" />
-          </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit">
-                Assign
-              </Button>
-              <Button onClick={() => {
-                setAssignModalVisible(false);
-                assignForm.resetFields();
-              }}>
-                Cancel
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
+        <Form form={assignForm} layout="vertical" onFinish={handleAssign}>
+  {/* <Form.Item
+    name="assignedCaseExecutorId"
+    label="Case Executor"
+    rules={[{ required: true, message: "Please select Case Executor" }]}
+  >
+    <Select placeholder="Select Case Executor">
+      
+    </Select>
+  </Form.Item> */}
+
+  <Form.Item
+  name="assignedCaseExecutorId"
+  label="Case Executor"
+  rules={[{ required: true, message: "Please select Case Executor" }]}
+>
+  <Select
+    placeholder="Select Case Executor"
+    loading={!caseExecutors.length}
+    showSearch
+    optionFilterProp="label"
+  >
+    {caseExecutors.map((user: any) => (
+      <Select.Option
+        key={user.id}
+        value={user.id}
+        label={`${user.firstName} ${user.lastName}`}
+      >
+        {user.firstName} {user.lastName}
+      </Select.Option>
+    ))}
+  </Select>
+</Form.Item>
+
+  <Form.Item
+  name="assignedAssessorId"
+  label="Assessor"
+  rules={[{ required: true }]}
+>
+  <Select disabled>
+    {currentUser && (
+      <Select.Option value={currentUser.id}>
+        {currentUser.firstName} {currentUser.lastName}
+      </Select.Option>
+    )}
+  </Select>
+</Form.Item>
+
+  <Form.Item name="assignmentNotes" label="Assignment Notes">
+    <TextArea rows={3} placeholder="Optional notes..." />
+  </Form.Item>
+
+  <Form.Item>
+    <Space>
+      <Button type="primary" htmlType="submit">
+        Assign Service
+      </Button>
+      <Button
+        onClick={() => {
+          setAssignModalVisible(false);
+          assignForm.resetFields();
+        }}
+      >
+        Cancel
+      </Button>
+    </Space>
+  </Form.Item>
+</Form>
       </Modal>
     </div>
   );

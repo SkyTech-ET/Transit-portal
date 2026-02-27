@@ -361,7 +361,7 @@ for (const service of fetchedServices) {
      <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
 
         {/* Latest Notifications */}
-  <div className="bg-white shadow rounded-xl p-4">
+  {/* <div className="bg-white shadow rounded-xl p-4">
     <h2 className="text-2xl font-bold mb-4">Latest Notifications</h2>
     {latestNotifications.length > 0 ? (
       <div className="space-y-2">
@@ -383,7 +383,7 @@ for (const service of fetchedServices) {
     ) : (
       <p className="text-gray-500">No notifications found.</p>
     )}
-  </div>
+  </div> */}
   
   {/* Recent Documents */}
   <div className="bg-white shadow rounded-xl p-4">

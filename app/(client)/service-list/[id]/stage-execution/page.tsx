@@ -29,6 +29,7 @@ import {
   DocumentType,
   IStageDocument,
   RiskLevel,
+  ServiceType
 } from "@/modules/mot/service/service.types";
 import useAuthStore from "@/modules/auth/auth.store";
 
@@ -219,26 +220,48 @@ useEffect(() => {
 
   const stages: IServiceStageExecution[] = currentService?.stages ?? [];
 
-  // order & labels to match screenshot
-  const stageOrder = useMemo(
-    () => [
-          ServiceStage.PrepaymentInvoice,
-          ServiceStage.TransitPermission,
-          ServiceStage.Amendment,
-          ServiceStage.DropRisk,
-          ServiceStage.DeliveryOrder,
-          ServiceStage.WarehouseStatus,
-          ServiceStage.Inspection,
-          ServiceStage.AssessmentandTaxPayment,
-          ServiceStage.Emergency,
-          ServiceStage.ExitandStoragePayment,
-          ServiceStage.Transportation,
-          ServiceStage.LocalPermission,
-          ServiceStage.Arrival,
-          ServiceStage.Clearance,
-    ],
-    []
+  const isMultimodal = currentService?.serviceType === ServiceType.Multimodal;
+
+  const displayedStages: IServiceStageExecution[] = stages.filter((s) => {
+  if (!isMultimodal) return true;
+
+  //  Remove these for multimodal
+  return (
+    s.stage !== ServiceStage.LocalPermission &&
+    s.stage !== ServiceStage.Arrival
   );
+});
+
+  // order & labels to match screenshot
+  const stageOrder = useMemo(() => {
+  const order = [
+    ServiceStage.PrepaymentInvoice,
+    ServiceStage.TransitPermission,
+    ServiceStage.Amendment,
+    ServiceStage.DropRisk,
+    ServiceStage.DeliveryOrder,
+    ServiceStage.WarehouseStatus,
+    ServiceStage.Inspection,
+    ServiceStage.AssessmentandTaxPayment,
+    ServiceStage.Emergency,
+    ServiceStage.ExitandStoragePayment,
+    ServiceStage.Transportation,
+    ServiceStage.LocalPermission,
+    ServiceStage.Arrival,
+    ServiceStage.Clearance,
+  ];
+
+  if (currentService?.serviceType === ServiceType.Multimodal) {
+    // ❌ remove 12 & 13
+    return order.filter(
+      (s) =>
+        s !== ServiceStage.LocalPermission &&
+        s !== ServiceStage.Arrival
+    );
+  }
+
+  return order;
+}, [currentService?.serviceType]);
 
   const stageLabels = [
     "Prepayment Invoice",
@@ -258,10 +281,12 @@ useEffect(() => {
     "Settlement",
   ];
 
+
+  const BASE_URL = "https://transitportal.skytechet.com";
   
 
   const findStageExec = (stageEnum: ServiceStage) =>
-    stages.find((s) => s.stage === stageEnum) ?? null;
+    displayedStages.find((s) => s.stage === stageEnum) ?? null;
 
   const uploadCustomerFile = async (
     stageExec: IServiceStageExecution | null,
@@ -454,14 +479,21 @@ const hasUnseenComments = (exec: any) => {
         <div className="text-xs text-gray-400 mb-2">Preview not available</div>
       )}
       <div className="flex items-center justify-between">
-        <div className="text-xs text-gray-500">{new Date(d.uploadedDate).toLocaleString()}</div>
-        <Button
-          type="link"
-          onClick={() => downloadStageDocument(d.id, d.originalFileName ?? d.fileName)}
-          className="text-blue-600 text-sm"
-        >
-          Download
-        </Button>
+        <div className="text-xs text-gray-500">{/* {new Date(d.uploadedDate).toLocaleString()} */}</div>
+        {
+  d.filePath ? (() => {
+    // Normalize Windows backslashes → URL format
+    const fileUrl = `${BASE_URL}/${d.filePath.replace(/\\/g, "/")}`;
+
+    return (
+      <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+        View
+      </a>
+    );
+  })() : (
+    <span>No File</span>
+  )
+}
       </div>
     </div>
   );
@@ -534,7 +566,7 @@ const hasUnseenComments = (exec: any) => {
   // compute progress percent for top progress bar (approx)
  const progressPercent = useMemo(() => {
   if (!stages || stages.length === 0) return 0;
-  const completedCount = stages.filter(s => s.status === StageStatus.Completed).length;
+  const completedCount = displayedStages.filter(s => s.status === StageStatus.Completed).length;
   return Math.round((completedCount / stageOrder.length) * 100);
 }, [stages, stageOrder]);
 
@@ -740,12 +772,12 @@ const hasUnseenComments = (exec: any) => {
                               {stage === ServiceStage.DeliveryOrder && (
                                 <div className="flex items-center gap-2">
   <Button
-  icon={<EyeOutlined style={{ color: "#1D4ED8" }} />}
+  icon={<EyeOutlined /* style={{ color: "#1D4ED8" }} */ />}
   onClick={() => {
     setDocStage(exec);
     setDocsOpen(true);
   }}
-  style={{
+  /* style={{
     backgroundColor: "#EFF6FF",
     borderColor: "#BFDBFE",
     borderWidth: 1,
@@ -755,6 +787,30 @@ const hasUnseenComments = (exec: any) => {
     fontSize: 16,
     display: "flex",
     alignItems: "center",
+  }} */
+>
+  View Documents
+</Button>
+
+
+                                </div>
+                              )}
+
+                              {stage === ServiceStage.TransitPermission && (
+                                <div className="flex items-center gap-2">
+                                  <Button icon={<EyeOutlined />} onClick={() => {setDocStage(exec); setDocsOpen(true);}}>
+                                    View Documents
+                                  </Button>
+                                </div>
+                              )}
+
+                              {stage === ServiceStage.Amendment && (
+                                <div className="flex items-center gap-2">
+  <Button
+  icon={<EyeOutlined /* style={{ color: "#1D4ED8" }} */ />}
+  onClick={() => {
+    setDocStage(exec);
+    setDocsOpen(true);
   }}
 >
   View Documents

@@ -9,6 +9,8 @@ import {
   PhoneOutlined,
   ProfileFilled,
   ProfileOutlined,
+  CustomerServiceOutlined,
+  FileAddOutlined,
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 import { PersonStanding } from "lucide-react";
@@ -35,7 +37,7 @@ export default function CustomerSidebar() {
         },
         {
           key: "/dashboard/service-requests",
-          icon: <PieChartOutlined />,
+          icon: <FileAddOutlined />,
           label: "Service",
         },
         /* {
@@ -59,7 +61,7 @@ export default function CustomerSidebar() {
           label: "Message Center",
         },
         {
-          key: "/admin/customer/contact-us",
+          key: "/dashboard/contact-us",
           icon: <PhoneOutlined />,
           label: "Contact Us",
         },

@@ -143,8 +143,8 @@ export default function CustomerListPage() {
             <Title level={5}>{selectedCustomer.businessName}</Title>
             <Divider />
 
-            {/* <p><strong>Customer ID:</strong> {selectedCustomer.id}</p>
-            <p><strong>User ID:</strong> {selectedCustomer.userId}</p>  */}
+             <p><strong>Customer ID:</strong> {selectedCustomer.id}</p>
+            <p><strong>User ID:</strong> {selectedCustomer.userId}</p>  
             <p><strong>TIN Number:</strong> {selectedCustomer.tinNumber}</p>
             <p>
   <strong>Business License:</strong>{" "}

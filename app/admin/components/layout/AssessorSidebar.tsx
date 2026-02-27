@@ -15,8 +15,8 @@ import { usePathname, useRouter } from "next/navigation";
 const items = [
   { key: "/admin/assessor/dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
   { key: "/admin/assessor/dashboard/customer-approval", icon: <UserOutlined />, label: "Customer Approval" },
-  { key: "/admin/assessor/service-requests", icon: <FileSearchOutlined />, label: "Service Requests" },
-  { key: "/admin/assessor/service-list", icon: <UnorderedListOutlined />, label: "Service List" },
+  { key: "/admin/assessor/service-request/[id]", icon: <FileSearchOutlined />, label: "Service Requests" },
+  { key: "/admin/assessor/dashboard/service-list", icon: <UnorderedListOutlined />, label: "Service List" },
   { key: "/admin/assessor/messages", icon: <MessageOutlined />, label: "Messages" },
   { key: "/admin/assessor/document", icon: <FileTextOutlined />, label: "Document Viewer" },
   { key: "/admin/assessor/assessment-logs", icon: <BellOutlined />, label: "Assessment Logs" },
