@@ -18,6 +18,7 @@ export type AuthState = {
   loading: boolean;
   user: IUser | null;
   error: string | null;
+  loaded?: boolean;
   //currentUser: IUser | null
 };
 
