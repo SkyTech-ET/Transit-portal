@@ -13,7 +13,7 @@ import Image from "next/image";
 export default function LoginPage() {
   const router = useRouter();
   const [form] = Form.useForm();
-  const { login, loading, user, loaded } = useAuthStore(); // <- add loaded flag if possible
+  const { login, loading, user, loaded } = useAuthStore();
 
   // Redirect logged-in users after store is fully loaded
   useEffect(() => {
