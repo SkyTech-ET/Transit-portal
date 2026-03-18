@@ -27,6 +27,9 @@ const UserForm = (props: UserFormProps) => {
   const router = useRouter();
   const [form] = Form.useForm();
 
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [fileList, setFileList] = useState<any[]>([]);
+
   const { roles, getRoles } = useRoleStore();
   const { currentUser, isAdmin } = usePermissionStore();
   const { loading, updateUser, addUser, setAdditionalParams } = useUserStore();
@@ -56,6 +59,23 @@ const UserForm = (props: UserFormProps) => {
       noRepeat: !/(.)\1{2,}/.test(val),
     });
   };
+
+  // image showing
+  useEffect(() => {
+    if (props.isEdit && props.payload?.profilePhoto) {
+      const existingFile = [
+        {
+          uid: "-1",
+          name: "profile.jpg",
+          status: "done",
+          url: `https://transitportal.skytechet.com/${props.payload.profilePhoto}`,
+        },
+      ];
+
+      setFileList(existingFile);
+      form.setFieldsValue({ profileFile: existingFile });
+    }
+  }, [props.payload]);
 
   const handleSubmit = async (values: any) => {
     try {
@@ -174,16 +194,31 @@ const UserForm = (props: UserFormProps) => {
 
   // enable submit only when all password rules pass and passwords match until button is invalid
 
-  const newPassword = Form.useWatch("newPassword", form);
-  const confirmPassword = Form.useWatch("confirmPassword", form);
+  const password = Form.useWatch("password", form);
+  const confirmPassword = Form.useWatch("confirmpassword", form);
   const isPasswordValid =
     Object.values(passwordRules).every(Boolean) &&
-    newPassword &&
+    password &&
     confirmPassword &&
-    newPassword === confirmPassword;
+    password === confirmPassword;
+
+  const isSubmitEnabled = props.isEdit
+    ? isFormValid // no password required in edit
+    : isFormValid && isPasswordValid;
+
+  useEffect(() => {
+    if (!confirmPassword) return;
+
+    messageApi.destroy(); // clear old messages
+
+    if (password === confirmPassword) {
+      messageApi.success("Passwords match ✔", 2);
+    }
+  }, [confirmPassword]);
 
   return (
     <>
+      {contextHolder}
       {/* Top Action Bar */}
       <div className="mb-1 mr-4 flex items-center justify-end">
         <Button
@@ -199,12 +234,18 @@ const UserForm = (props: UserFormProps) => {
         ref={formRef}
         name="Add/Edit"
         autoComplete="off"
-        onFinish={(values) => {
-          handleSubmit(values);
+        onFinish={handleSubmit}
+        onValuesChange={(_, allValues) => {
+          const hasErrors = form
+            .getFieldsError()
+            .some(({ errors }) => errors.length > 0);
+
+          const allFilled = Object.values(allValues).every(
+            (val) => val !== undefined && val !== null && val !== ""
+          );
+
+          setIsFormValid(!hasErrors && allFilled);
         }}
-        onFinishFailed={(errorInfo) => {}}
-        labelCol={{ span: 24 }}
-        requiredMark={true}
       >
         <div className="ml-20 mr-4 flex flex-col">
           {/* Name */}
@@ -369,7 +410,10 @@ const UserForm = (props: UserFormProps) => {
                     label: "At least one lowercase letter",
                     valid: passwordRules.lowercase,
                   },
-                  { label: "At least one number", valid: passwordRules.number },
+                  {
+                    label: "At least one number",
+                    valid: passwordRules.number,
+                  },
                   {
                     label: "At least one special character",
                     valid: passwordRules.special,
@@ -435,6 +479,7 @@ const UserForm = (props: UserFormProps) => {
               </Form.Item>
             </div>
           ) : null}
+
           <div className="flex flex-row space-x-4">
             {/* Role and Organization */}
             {isAdmin && (
@@ -554,79 +599,50 @@ const UserForm = (props: UserFormProps) => {
               className="w-full md:w-1/3"
             >
               <Upload
+                listType="picture-card"
+                fileList={fileList}
+                maxCount={1}
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                 beforeUpload={(file) => {
-                  // Validate image format
                   const isImage = file.type.startsWith("image/");
                   if (!isImage) {
                     message.error("You can only upload image files!");
-                    return false;
+                    return Upload.LIST_IGNORE;
                   }
 
-                  // Validate file size (max 5MB)
                   const isLt5M = file.size / 1024 / 1024 < 5;
                   if (!isLt5M) {
                     message.error("Image must be smaller than 5MB!");
-                    return false;
+                    return Upload.LIST_IGNORE;
                   }
 
-                  // Validate specific image formats
-                  const allowedTypes = [
-                    "image/jpeg",
-                    "image/jpg",
-                    "image/png",
-                    "image/gif",
-                    "image/webp",
-                  ];
-                  if (!allowedTypes.includes(file.type)) {
-                    message.error(
-                      "Only JPG, PNG, GIF, and WebP images are allowed!"
-                    );
-                    return false;
-                  }
-
-                  // Set the file in the form
-                  form.setFieldValue("profileFile", file);
-                  return false; // Prevent auto upload
+                  return false; // prevent auto upload
                 }}
-                onChange={(info) => {
-                  if (info.fileList.length > 0) {
-                    // If it's a new file (has originFileObj), use that
-                    if (info.fileList[0].originFileObj) {
-                      form.setFieldValue(
-                        "profileFile",
-                        info.fileList[0].originFileObj
-                      );
-                    } else {
-                      // If it's an existing file (no originFileObj), keep the existing value
-                      form.setFieldValue(
-                        "profileFile",
-                        props.payload?.profilePhoto
-                      );
+                onChange={({ fileList: newFileList }) => {
+                  // generate preview URL for new image
+                  const updatedList = newFileList.map((file) => {
+                    if (file.originFileObj) {
+                      return {
+                        ...file,
+                        url: URL.createObjectURL(file.originFileObj),
+                      };
                     }
-                  } else {
-                    form.setFieldValue("profileFile", null);
-                  }
+                    return file;
+                  });
+
+                  setFileList(updatedList);
+
+                  // store actual file in form
+                  const fileObj = updatedList[0]?.originFileObj || null;
+                  form.setFieldValue("profileFile", fileObj);
                 }}
-                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                maxCount={1}
-                listType="picture-card"
-                fileList={
-                  props.isEdit && props.payload?.profilePhoto
-                    ? [
-                        {
-                          uid: "-1",
-                          name: "existing-photo.jpg",
-                          status: "done",
-                          url: `https://transitportal.skytechet.com/${props.payload.profilePhoto}`,
-                        },
-                      ]
-                    : []
-                }
               >
-                <div>
-                  <UploadOutlined />
-                  <div style={{ marginTop: 8 }}>Upload Photo</div>
-                </div>
+                {fileList.length < 1 && (
+                  <div>
+                    <UploadOutlined />
+                    <div style={{ marginTop: 8 }}>Upload Photo</div>
+                  </div>
+                )}
               </Upload>
             </Form.Item>
           </div>
@@ -670,8 +686,7 @@ const UserForm = (props: UserFormProps) => {
                 loading={loading}
                 block
                 style={{ width: "100%", height: "2.4rem" }}
-                onClick={() => {}}
-                disabled={!isPasswordValid} // disable button until valid
+                disabled={!isSubmitEnabled}
               >
                 {props.payload != null ? "Save change" : "Create"}
               </Button>
