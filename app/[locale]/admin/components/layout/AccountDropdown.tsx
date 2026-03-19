@@ -1,0 +1,97 @@
+"use client";
+
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { authRoutes } from "@/modules/auth";
+import useAuthStore from "@/modules/auth/auth.store";
+import { IUser, userRoutes } from "@/modules/user";
+import { UserOutlined } from "@ant-design/icons";
+import { Avatar, Button, Popover, Space } from "antd";
+import { UserRound } from "lucide-react";
+
+import { LanguageSwitcher } from "../../../../../providers/LanguageSwitcher";
+import LoadingDialog from "../common/LoadingDialog";
+
+const AccountDropdown = (props: { currentUser: IUser | null }) => {
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const { loading, logout } = useAuthStore();
+
+  const BASEURL = "https://transitportal.skytechet.com";
+  const avatarUrl = props.currentUser?.profilePhoto
+    ? `${BASEURL}/${props.currentUser.profilePhoto.split("\\").pop()}`
+    : undefined; // let Avatar fallback to icon
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+  };
+  const onLogout = async () => {
+    await logout();
+    router.push(authRoutes.login);
+    //window.location.reload()
+  };
+
+  const content = (
+    <div className="flex flex-col">
+      <div className="flex flex-col items-center justify-center gap-1">
+        <Avatar
+          className="cursor-pointer"
+          size={{ xs: 14, sm: 18, md: 24, lg: 30, xl: 34, xxl: 50 }}
+          src={avatarUrl}
+          icon={!avatarUrl && <UserOutlined />} // fallback icon
+        />
+        <p className="text-md font-semibold">
+          {props.currentUser?.firstName} {props.currentUser?.lastName}
+        </p>
+        <a href="#" className="text-sm text-blue-400">
+          {props.currentUser?.email}
+        </a>
+      </div>
+      <div className="my-3 w-full border-t border-slate-100" />
+      <div className="flex flex-row justify-between">
+        <Button
+          onClick={() =>
+            router.push(userRoutes.profile + props.currentUser?.id)
+          }
+          type="text"
+        >
+          <Space>
+            <UserRound />
+            Edit Profile
+          </Space>
+        </Button>
+      </div>
+      <div className="my-3 w-full border-t border-slate-100" />
+      <div className="flex flex-row justify-between">
+        <div className="mt-1 text-gray-400">My Account</div>
+        <Button onClick={() => onLogout()} type="link" danger>
+          Logout
+        </Button>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <Popover
+        open={open}
+        trigger="click"
+        content={content}
+        onOpenChange={handleOpenChange}
+      >
+        <Avatar
+          className="cursor-pointer"
+          size={{ xs: 28, sm: 28, md: 28, lg: 30, xl: 34, xxl: 50 }}
+          src={avatarUrl} // ✅ use profile image
+          icon={!avatarUrl && <UserOutlined />} // ✅ fallback
+        >
+          {!avatarUrl && props.currentUser?.firstName?.charAt(0).toUpperCase()}
+        </Avatar>
+      </Popover>
+
+      <LoadingDialog visible={loading} />
+    </>
+  );
+};
+
+export default AccountDropdown;

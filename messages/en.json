@@ -1,0 +1,15 @@
+{
+  "auth": {
+    "loginTitle": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "forgetpassword": "forget your password"
+  },
+  "common": {
+    "Login": "Login",
+    "logout": "Logout",
+    "dashboard": "Dashboard",
+    "welcome": "Welcome Back"
+  }
+}

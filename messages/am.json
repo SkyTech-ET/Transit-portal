@@ -1,0 +1,15 @@
+{
+  "auth": {
+    "loginTitle": "ግባ ",
+    "email": "ኢሜይል",
+    "password": "የይለፍ ቃል",
+    "login": "ግባ",
+    "forgetpassword": "የይለፍ ቃል ረሳ"
+  },
+  "common": {
+    "Login": "ግባ",
+    "logout": "ውጣ",
+    "dashboard": "ዳሽቦርድ",
+    "Welcome Back": "እንኳን ደህና መጡ"
+  }
+}
