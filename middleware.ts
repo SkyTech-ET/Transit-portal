@@ -1,36 +1,53 @@
-"use server";
-
-import { NextApiRequest } from "next";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import createMiddleware from "next-intl/middleware";
+
 import { authRoutes } from "./modules/auth/auth.routes";
 
-export async function middleware(req: NextApiRequest) {
+// next-intl middleware
+const intlMiddleware = createMiddleware({
+  locales: ["en", "am"],
+  defaultLocale: "en",
+});
 
-  // COMMENTED OUT FOR TESTING - AUTH BYPASS
-  // const token = await getSessionData();
+export async function middleware(req: NextRequest) {
+  // Handle i18n routing first
+  const intlResponse = intlMiddleware(req);
+  if (intlResponse) return intlResponse;
 
-  // if ((req.url as string).endsWith(authRoutes.login)) {
-  //   if (token) {
-  //     return NextResponse.redirect(new URL("/admin", req.url));
-  //   }
-  //   return NextResponse.next();
-  // }
+  // Check session
+  const token = await getSessionData();
 
-  // if (!token) {
-  //   const url = new URL(authRoutes.login, req.url);
-  //   url.searchParams.set("callbackUrl", encodeURI(req.url || ""));
-  //   return NextResponse.redirect(url);
-  // }
+  // Force locale redirect
+  const authPaths = [
+    authRoutes.login,
+    authRoutes.signup,
+    authRoutes.forgot_password,
+  ];
+  const pathname = req.nextUrl.pathname;
+
+  // If the path is without locale, redirect to /en/auth/login
+  if (authPaths.some((path) => pathname === path)) {
+    const url = req.nextUrl.clone();
+    url.pathname = `/en${pathname}`;
+    return NextResponse.redirect(url);
+  }
+
+  // Protect admin routes
+  if (pathname.startsWith("/admin") && !token) {
+    const url = req.nextUrl.clone();
+    url.pathname = `/en${authRoutes.login}`;
+    return NextResponse.redirect(url);
+  }
 
   return NextResponse.next();
 }
 
 export async function getSessionData() {
-  const sessionData = cookies().get('transit-portal-accessToken')?.value;
-  return sessionData;
+  return cookies().get("transit-portal-accessToken")?.value;
 }
 
+// Matcher
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/", "/(en|am)/:path*", "/admin/:path*", "/auth/:path*"],
 };

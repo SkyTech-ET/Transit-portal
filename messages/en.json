@@ -11,5 +11,15 @@
     "logout": "Logout",
     "dashboard": "Dashboard",
     "welcome": "Welcome Back"
+  },
+  "AdminSidbar": {
+    "dashboard": "Dashboard",
+    "stageoverview": "Stage Overview",
+    "systemuser": "System Users",
+    "profilesetting": "Profile Settings",
+    "staffmanagment": "Staff Managment",
+    "customermanagment": "Customer Managment",
+    "documents": "Documents",
+    "notifications": "Notifications"
   }
 }

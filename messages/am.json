@@ -11,5 +11,14 @@
     "logout": "ውጣ",
     "dashboard": "ዳሽቦርድ",
     "Welcome Back": "እንኳን ደህና መጡ"
+  },
+  "AdminSidbar": {
+    "dashboard": "",
+    "stageoverview": "",
+    "systemuser": "",
+    "profilesetting": "",
+    "staffmanagment": "",
+    "documents": "",
+    "notifications": ""
   }
 }

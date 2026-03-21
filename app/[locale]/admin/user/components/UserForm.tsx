@@ -29,25 +29,8 @@ const UserForm = (props: UserFormProps) => {
 
   const { roles, getRoles } = useRoleStore();
   const { currentUser, isAdmin } = usePermissionStore();
-  const [fileList, setFileList] = useState<any[]>([]);
   const { loading, updateUser, addUser, setAdditionalParams } = useUserStore();
 
-  // image showing
-  useEffect(() => {
-    if (props.isEdit && props.payload?.profilePhoto) {
-      const existingFile = [
-        {
-          uid: "-1",
-          name: "profile.jpg",
-          status: "done",
-          url: `https://transitportal.skytechet.com/${props.payload.profilePhoto}`,
-        },
-      ];
-
-      setFileList(existingFile);
-      form.setFieldsValue({ profileFile: existingFile });
-    }
-  }, [props.payload]);
   const [messageApi, contextHolder] = message.useMessage();
 
   const [passwordRules, setPasswordRules] = useState({
@@ -191,8 +174,6 @@ const UserForm = (props: UserFormProps) => {
 
   // enable submit only when all password rules pass and passwords match until button is invalid
 
-  const password = Form.useWatch("password", form);
-
   const newPassword = Form.useWatch("password", form);
   const confirmPassword = Form.useWatch("confirmpassword", form);
   const isPasswordValid =
@@ -200,19 +181,6 @@ const UserForm = (props: UserFormProps) => {
     newPassword &&
     confirmPassword &&
     newPassword === confirmPassword;
-  const isSubmitEnabled = props.isEdit
-    ? isFormValid // no password required in edit
-    : isFormValid && isPasswordValid;
-
-  useEffect(() => {
-    if (!confirmPassword) return;
-
-    messageApi.destroy(); // clear old messages
-
-    if (password === confirmPassword) {
-      messageApi.success("Passwords match ✔", 2);
-    }
-  }, [confirmPassword]);
 
   return (
     <>

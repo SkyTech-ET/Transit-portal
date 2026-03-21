@@ -2,6 +2,7 @@ import "../../styles/globals.css";
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { LanguageSwitcher } from "@/providers/LanguageSwitcher";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
@@ -28,7 +29,16 @@ export default async function LocaleLayout({
     <html lang={locale}>
       <body className={inter.className}>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <AntdRegistry>{children}</AntdRegistry>
+          <AntdRegistry>
+            {/* 🔥 Top Header */}
+            <div className="mx-6 flex items-center justify-end gap-4 border-b bg-white px-3 py-1">
+              {/* Profile icon comes here (later) */}
+              <LanguageSwitcher />
+            </div>
+
+            {/* Page Content */}
+            {children}
+          </AntdRegistry>
         </NextIntlClientProvider>
       </body>
     </html>
