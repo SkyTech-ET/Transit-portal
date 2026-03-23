@@ -12,14 +12,249 @@
     "dashboard": "Dashboard",
     "welcome": "Welcome Back"
   },
-  "AdminSidbar": {
+  "AdminSidebar": {
     "dashboard": "Dashboard",
     "stageoverview": "Stage Overview",
-    "systemuser": "System Users",
+    "systemusers": "System Users",
     "profilesetting": "Profile Settings",
     "staffmanagment": "Staff Managment",
     "customermanagment": "Customer Managment",
     "documents": "Documents",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "notificationsgroup": "Notifications",
+    "managmentgroup": "Managment",
+    "totalservices": "Total Services",
+    "activecustomes": "Active Customers",
+    "pendingapprovals": "Pending Approvals",
+    "totaldocuments": "Total Documents",
+    "approvedservices": "Total Approved Services",
+    "totalorders": "Total Services",
+    "servicerequesttrend": "Service Request Trend",
+    "weeklystaffasseignments": "Weekly Staff Assiegnments",
+    "noweeklystaffassignmentdata": "No weekly staff assignment data"
+  },
+  "DataEncoderSidebar": {
+    "customersgroup": "Customers",
+    "newcustomer": "New Customer",
+    "updatecustomer": "Update Customer",
+    "customerlist": "Customer List",
+    "servicesgroup": "Services",
+    "servicelist": "Service List",
+    "communicationsgroup": "Communication",
+    "chat": "Chat",
+    "toolsgroup": "Tools",
+    "bulkupload": "Bulk Upload"
+  },
+  "DataEncoderDashboard": {
+    "dashboardoverview": "Dashboard Overview",
+    "welcomebacktitle": "Welcome back, here’s what’s happening today",
+    "draftrequests": "Draft Requests",
+    "submitedservices": "Submitted Services",
+    "approvalrate": "Approval Rate",
+    "recentactivities": "Recent Activities",
+    "norecentactivities": "No recent activities",
+    "pendingtasks": "Pending Tasks",
+    "nopendingtasks": "No Pending Tasks"
+  },
+
+  "DataEncoderCustomerList": {
+    "title": "Active Customers",
+    "refresh": "Refresh",
+    "noCustomers": "No active customers",
+    "verified": "Verified",
+    "notVerified": "Not Verified",
+    "tin": "TIN",
+    "contact": "Contact",
+    "email": "Email",
+    "view": "View",
+    "createService": "Create Service",
+    "modal": {
+      "title": "Customer Details",
+      "close": "Close",
+      "customerId": "Customer ID",
+      "userId": "User ID",
+      "tinNumber": "TIN Number",
+      "businessLicense": "Business License",
+      "viewDocument": "View Document",
+      "licensePreview": "Business License Preview",
+      "businessType": "Business Type",
+      "addressDocument": "Business Address Document",
+      "contactPerson": "Contact Person",
+      "phone": "Phone",
+      "importLicense": "Import License",
+      "expiry": "Import License Expiry",
+      "status": "Status",
+      "na": "N/A"
+    }
+  },
+  "DataEncoderCreateCustomer": {
+    "pageTitle": "Create Customer",
+    "personalInfo": "Personal Information",
+    "businessInfo": "Business Information",
+    "addressInfo": "Address Information",
+    "contactPersonInfo": "Contact Person Details",
+    "documents": "Required Documents",
+    "fields": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "businessName": "Business Name",
+      "tinNumber": "TIN Number",
+      "businessType": "Business Type",
+      "importLicense": "Import License",
+      "importLicenseExpiry": "Import License Expiry",
+      "city": "City",
+      "state": "Region/State",
+      "postalCode": "Postal Code",
+      "contactPerson": "Contact Person",
+      "contactPhone": "Contact Phone",
+      "contactEmail": "Contact Email",
+      "businessLicenseFile": "Business License",
+      "businessAddressFile": "Business Address Proof",
+      "taxDocumentationFile": "Tax Documentation",
+      "identityProofFile": "Identity Proof"
+    },
+    "placeholders": {
+      "upload": "Upload",
+      "selectDate": "Select date"
+    },
+    "validation": {
+      "required": "This field is required"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "submit": "Create Customer"
+    }
+  },
+  "DataEncoderUpdateCustomer": {
+    "title": "Customers without Users",
+    "noCustomers": "No customers to update",
+    "verified": "Verified",
+    "tin": "TIN",
+    "contact": "Contact",
+    "email": "Email",
+    "updateBtn": "Update Customer",
+    "modal": {
+      "title": "Update Customer - {{name}}",
+      "basicInfo": "Basic Information",
+      "businessInfo": "Business Information",
+      "rolesAdmin": "Roles & Administration",
+      "fileUploads": "File Uploads",
+      "fields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "phone": "Phone",
+        "username": "Username",
+        "password": "Password",
+        "passwordPlaceholder": "Enter new password",
+        "passwordError": "Password must be at least 6 characters",
+        "contactPhone": "Contact Phone",
+        "contactEmail": "Contact Email",
+        "businessName": "Business Name",
+        "tinNumber": "TIN Number",
+        "businessType": "Business Type",
+        "businessAddress": "Business Address",
+        "businessLicense": "Business License",
+        "role": "Role",
+        "rolePlaceholder": "Select role",
+        "superAdmin": "Super Admin",
+        "yes": "Yes",
+        "no": "No",
+        "profileFile": "Profile Photo",
+        "identityProofFile": "Identity Proof",
+        "businessAddressFile": "Business Address File",
+        "businessLicenseFile": "Business License File",
+        "taxDocumentationFile": "Tax Documentation File"
+      },
+      "actions": {
+        "submit": "Update Customer",
+        "cancel": "Cancel",
+        "upload": "Upload"
+      }
+    },
+    "messages": {
+      "success": "Customer updated successfully!",
+      "error": "Failed to update customer. Ensure all required fields are uploaded."
+    }
+  },
+  "DataEncoderDocumentsPage": {
+    "pageTitle": "My Documents",
+    "noDocuments": "No documents uploaded for this service.",
+    "serviceTable": {
+      "serviceNumber": "Service Number",
+      "serviceType": "Service Type",
+      "registeredDate": "Registered Date"
+    },
+    "documentTable": {
+      "documentName": "Document Name",
+      "uploadedOn": "Uploaded On",
+      "size": "Size",
+      "action": "Action",
+      "view": "View"
+    },
+    "serviceTypes": {
+      "Multimodal": "Multimodal",
+      "UniModal": "UniModal"
+    }
+  },
+  "CaseExecuterSidebar": {
+    "dashboard": "Dashboard",
+    "groups": {
+      "services": "Services",
+      "documents": "Documents",
+      "communication": "Communication",
+      "account": "Account"
+    },
+    "items": {
+      "serviceList": "Service List",
+      "serviceCategories": "Service Categories",
+      "documentCenter": "Document Center",
+      "messaging": "Messaging",
+      "profile": "Profile"
+    }
+  },
+  "CaseExecuterDashboard": {
+    "header": {
+      "title": "Case Executor Dashboard",
+      "subtitle": "Service execution and management"
+    },
+    "stats": {
+      "total": "Total Services",
+      "inProgress": "In Progress",
+      "pending": "Pending",
+      "completed": "Completed"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "viewAll": "View All Services",
+      "pending": "Pending Services",
+      "inProgress": "In Progress",
+      "completed": "Completed"
+    },
+    "table": {
+      "title": "Service Execution Queue",
+      "empty": "No services assigned",
+      "cols": {
+        "serviceNumber": "Service Number",
+        "customer": "Customer",
+        "serviceType": "Service Type",
+        "status": "Status",
+        "progress": "Progress",
+        "actions": "Actions"
+      },
+      "actions": {
+        "view": "View",
+        "execute": "Execute"
+      }
+    },
+    "status": {
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "submitted": "Submitted",
+      "rejected": "Rejected",
+      "default": "Default"
+    }
   }
 }

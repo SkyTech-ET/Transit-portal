@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Menu } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import AdminSideBar from "../components/layout/AdminSideBar";
 
@@ -11,7 +12,7 @@ export default function AdminSideLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  const t = useTranslations("AdminSidebar");
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
@@ -37,7 +38,7 @@ export default function AdminSideLayout({
           >
             <Menu size={24} />
           </button>
-          <h1 className="ml-4 text-lg font-semibold">Dashboard</h1>
+          <h1 className="ml-4 text-lg font-semibold">{t("dashboard")}</h1>
         </div>
 
         {/* Page content */}

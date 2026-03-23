@@ -57,10 +57,6 @@ export default function LoginPage() {
 
   return (
     <>
-      <div className="fixed right-4 top-4 z-50">
-        <LanguageSwitcher />
-      </div>
-
       <div className="flex min-h-screen items-center justify-center bg-slate-100">
         {/* MAIN WRAPPER (ONE CONTAINER) */}
         <div className="flex h-[620px] w-[1100px] overflow-hidden rounded-2xl bg-white shadow-2xl">

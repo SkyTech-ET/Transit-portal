@@ -1,12 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
-  BarChart,
   Bar,
+  BarChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
 
 interface WeeklyStaffItem {
@@ -19,21 +20,20 @@ export default function WeeklyStaffChart({
 }: {
   data: WeeklyStaffItem[];
 }) {
+  const t = useTranslations("AdminSidebar");
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white rounded-xl border p-4 flex items-center justify-center h-[320px]">
-        <p className="text-gray-400 text-sm">
-          No weekly staff assignment data
+      <div className="flex h-[320px] items-center justify-center rounded-xl border bg-white p-4">
+        <p className="text-sm text-gray-400">
+          {t("noweeklystaffassignmentdata")}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl border p-4 h-[420px]">
-      <h3 className="font-semibold mb-3">
-        Weekly Staff Assignments
-      </h3>
+    <div className="h-[420px] rounded-xl border bg-white p-4">
+      <h3 className="mb-3 font-semibold">{t("weeklystaffasseignments")}</h3>
 
       {/* 👇 HEIGHT IS CRITICAL */}
       <ResponsiveContainer width="100%" height={350}>
@@ -53,7 +53,3 @@ export default function WeeklyStaffChart({
     </div>
   );
 }
-
-
-
-

@@ -12,13 +12,249 @@
     "dashboard": "ዳሽቦርድ",
     "Welcome Back": "እንኳን ደህና መጡ"
   },
-  "AdminSidbar": {
-    "dashboard": "",
-    "stageoverview": "",
-    "systemuser": "",
-    "profilesetting": "",
-    "staffmanagment": "",
-    "documents": "",
-    "notifications": ""
+  "AdminSidebar": {
+    "dashboard": "ዳሽቦርድ",
+    "stageoverview": "የደረጃ እይታ",
+    "staffmanagment": "የሰራተኞች አስተዳደር",
+    "customermanagment": "የደንበኞች አስተዳደር",
+    "systemusers": "የስርዓት ተጠቃሚዎች",
+    "profilesetting": "የፕሮፋይል ቅንብሮች",
+    "documents": "ሰነዶች",
+    "notifications": "ማስጠንቀቂያዎች",
+    "notificationsgroup": "ማስጠንቀቂያዎች",
+    "managmentgroup": "አስተዳደር",
+    "totalservices": "ጠቅላላ አገልግሎቶች",
+    "activecustomes": "ንቁ ደንበኞች",
+    "pendingapprovals": "በመጠባበቅ ላይ ያሉ ማጽደቆች",
+    "totaldocuments": "ጠቅላላ ሰነዶች",
+    "approvedservices": "ጠቅላላ የተፈቀዱ አገልግሎቶች",
+    "totalorders": "ጠቅላላ ትዕዛዞች",
+    "servicerequesttrend": "የአገልግሎት ጥያቄ አዝማሚያ",
+    "weeklystaffasseignments": "ሳምንታዊ የሰራተኞች ምደባዎች",
+    "noweeklystaffassignmentdata": "ሳምንታዊ የሰራተኞች ምደባ መረጃ የለም"
+  },
+  "DataEncoderSidebar": {
+    "customersgroup": "ደንበኞች",
+    "newcustomer": "አዲስ ደንበኛ",
+    "updatecustomer": "ደንበኛን ያዘምኑ",
+    "customerlist": "የደንበኛ ዝርዝር",
+    "servicesgroup": "አገልግሎቶች",
+    "servicelist": "የአገልግሎት ዝርዝር",
+    "communicationsgroup": "ኮሙኒኬሽን",
+    "chat": "ቻት",
+    "toolsgroup": "Tools",
+    "bulkupload": "መሳሪያዎች"
+  },
+  "DataEncoderDashboard": {
+    "dashboardoverview": "የዳሽቦርድ አጠቃላይ እይታ",
+    "welcomebacktitle": "እንኳን ደህና መጡ፣ ዛሬ ምን እየተከናወነ እንዳለ እነሆ",
+    "draftrequests": "ረቂቅ ጥያቄዎች",
+    "submitedservices": "የገቡ አገልግሎቶች",
+    "approvalrate": "የማጽደቅ መጠን",
+    "recentactivities": "የቅርብ ጊዜ እንቅስቃሴዎች",
+    "norecentactivities": "ምንም የቅርብ ጊዜ እንቅስቃሴዎች የሉም",
+    "pendingtasks": "በጥበቃ ላይ ያሉ ተግባራት",
+    "nopendingtasks": "ምንም በጥበቃ ላይ ያሉ ተግባራት የሉም"
+  },
+
+  "DataEncoderCustomerList": {
+    "title": "ንቁ ደንበኞች",
+    "refresh": "አድስ",
+    "noCustomers": "ምንም ንቁ ደንበኞች የሉም",
+    "verified": "የተረጋገጠ",
+    "notVerified": "ያልተረጋገጠ",
+    "tin": "የግብር ከፋይ መለያ ቁጥር (TIN)",
+    "contact": "ተጠሪ",
+    "email": "ኢሜይል",
+    "view": "ተመልከት",
+    "createService": "አገልግሎት ፍጠር",
+    "modal": {
+      "title": "የደንበኛ ዝርዝር መረጃ",
+      "close": "ዝጋ",
+      "customerId": "የደንበኛ መለያ",
+      "userId": "የተጠቃሚ መለያ",
+      "tinNumber": "የቲን (TIN) ቁጥር",
+      "businessLicense": "የንግድ ፈቃድ",
+      "viewDocument": "ሰነዱን ተመልከት",
+      "licensePreview": "የንግድ ፈቃድ ቅድመ-ዕይታ",
+      "businessType": "የንግድ ዘርፍ",
+      "addressDocument": "የንግድ አድራሻ ሰነድ",
+      "contactPerson": "ተጠሪ ሰው",
+      "phone": "ስልክ",
+      "importLicense": "የገቢ ንግድ ፈቃድ",
+      "expiry": "የፈቃድ ማብቂያ ጊዜ",
+      "status": "ሁኔታ",
+      "na": "የለም"
+    }
+  },
+  "DataEncoderCreateCustomer": {
+    "pageTitle": "አዲስ ደንበኛ መመዝገቢያ",
+    "personalInfo": "የግል መረጃ",
+    "businessInfo": "የንግድ ድርጅት መረጃ",
+    "addressInfo": "የአድራሻ መረጃ",
+    "contactPersonInfo": "የተጠሪ ሰው ዝርዝር መረጃ",
+    "documents": "አስፈላጊ ሰነዶች",
+    "fields": {
+      "firstName": "የመጀመሪያ ስም",
+      "lastName": "የአባት ስም",
+      "email": "ኢሜይል",
+      "phone": "ስልክ ቁጥር",
+      "businessName": "የንግድ ስም",
+      "tinNumber": "የቲን (TIN) ቁጥር",
+      "businessType": "የንግድ ዘርፍ",
+      "importLicense": "የገቢ ንግድ ፈቃድ",
+      "importLicenseExpiry": "የንግድ ፈቃድ ማብቂያ ጊዜ",
+      "city": "ከተማ",
+      "state": "ክልል/መስተዳድር",
+      "postalCode": "የፖስታ ሳጥን ቁጥር",
+      "contactPerson": "ተጠሪ ሰው",
+      "contactPhone": "የተጠሪ ስልክ",
+      "contactEmail": "የተጠሪ ኢሜይል",
+      "businessLicenseFile": "የንግድ ፈቃድ",
+      "businessAddressFile": "የንግድ አድራሻ ማረጋገጫ",
+      "taxDocumentationFile": "የታክስ ሰነድ",
+      "identityProofFile": "የመታወቂያ ማረጋገጫ"
+    },
+    "placeholders": {
+      "upload": "ጫን (Upload)",
+      "selectDate": "ቀን ይምረጡ"
+    },
+    "validation": {
+      "required": "ይህ ቦታ መሞላት አለበት"
+    },
+    "actions": {
+      "cancel": "ሰርዝ",
+      "submit": "ደንበኛ ፍጠር"
+    }
+  },
+  "DataEncoderUpdateCustomer": {
+    "title": "የተጠቃሚ አካውንት የሌላቸው ደንበኞች",
+    "noCustomers": "የሚታደስ የደንበኛ መረጃ የለም",
+    "verified": "የተረጋገጠ",
+    "tin": "የቲን (TIN) ቁጥር",
+    "contact": "ተጠሪ",
+    "email": "ኢሜይል",
+    "updateBtn": "መረጃ አዘምን",
+    "modal": {
+      "title": "የደንበኛ መረጃ ማዘመኛ - {{name}}",
+      "basicInfo": "መሰረታዊ መረጃ",
+      "businessInfo": "የንግድ ድርጅት መረጃ",
+      "rolesAdmin": "ተዋረድ እና አስተዳደር",
+      "fileUploads": "ሰነዶችን መጫኛ",
+      "fields": {
+        "firstName": "የመጀመሪያ ስም",
+        "lastName": "የአባት ስም",
+        "email": "ኢሜይል",
+        "phone": "ስልክ",
+        "username": "የተጠቃሚ ስም (Username)",
+        "password": "የይለፍ ቃል",
+        "passwordPlaceholder": "አዲስ የይለፍ ቃል ያስገቡ",
+        "passwordError": "የይለፍ ቃል ቢያንስ 6 ፊደላት መሆን አለበት",
+        "contactPhone": "የተጠሪ ስልክ",
+        "contactEmail": "የተጠሪ ኢሜይል",
+        "businessName": "የንግድ ድርጅት ስም",
+        "tinNumber": "የቲን (TIN) ቁጥር",
+        "businessType": "የንግድ ዘርፍ",
+        "businessAddress": "የድርጅት አድራሻ",
+        "businessLicense": "የንግድ ፈቃድ ቁጥር",
+        "role": "ተዋረድ (Role)",
+        "rolePlaceholder": "ተዋረድ ይምረጡ",
+        "superAdmin": "ዋና አስተዳዳሪ (Super Admin)",
+        "yes": "አዎ",
+        "no": "አይደለም",
+        "profileFile": "የመገለጫ ፎቶ",
+        "identityProofFile": "የመታወቂያ ማረጋገጫ",
+        "businessAddressFile": "የአድራሻ ማረጋገጫ ሰነድ",
+        "businessLicenseFile": "የንግድ ፈቃድ ሰነድ",
+        "taxDocumentationFile": "የታክስ ሰነድ"
+      },
+      "actions": {
+        "submit": "መረጃውን አዘምን",
+        "cancel": "ሰርዝ",
+        "upload": "ጫን (Upload)"
+      }
+    },
+    "messages": {
+      "success": "የደንበኛው መረጃ በትክክል ታድሷል!",
+      "error": "መረጃውን ማዘመን አልተሳካም። እባክዎ አስፈላጊ ሰነዶች መጫናቸውን ያረጋግጡ።"
+    }
+  },
+  "DataEncoderDocumentsPage": {
+    "pageTitle": "የእኔ ሰነዶች",
+    "noDocuments": "ለዚህ አገልግሎት የተጫነ ሰነድ የለም።",
+    "serviceTable": {
+      "serviceNumber": "የአገልግሎት ቁጥር",
+      "serviceType": "የአገልግሎት አይነት",
+      "registeredDate": "የተመዘገበበት ቀን"
+    },
+    "documentTable": {
+      "documentName": "የሰነዱ ስም",
+      "uploadedOn": "የተጫነበት ቀን",
+      "size": "መጠን",
+      "action": "ተግባር",
+      "view": "ተመልከት"
+    },
+    "serviceTypes": {
+      "Multimodal": "መልቲ-ሞዳል",
+      "UniModal": "ዩኒ-ሞዳል"
+    }
+  },
+  "CaseExecuterSidebar": {
+    "dashboard": "ዳሽቦርድ",
+    "groups": {
+      "services": "አገልግሎቶች",
+      "documents": "ሰነዶች",
+      "communication": "ግንኙነት",
+      "account": "መለያ"
+    },
+    "items": {
+      "serviceList": "የአገልግሎቶች ዝርዝር",
+      "serviceCategories": "የአገልግሎት ዘርፎች",
+      "documentCenter": "የሰነዶች ማዕከል",
+      "messaging": "መልዕክቶች",
+      "profile": "መገለጫ"
+    }
+  },
+  "CaseExecuterDashboard": {
+    "header": {
+      "title": "የጉዳይ አስፈፃሚ ዳሽቦርድ",
+      "subtitle": "የአገልግሎት አፈፃፀም እና አስተዳደር"
+    },
+    "stats": {
+      "total": "ጠቅላላ አገልግሎቶች",
+      "inProgress": "በሂደት ላይ",
+      "pending": "በጥበቃ ላይ",
+      "completed": "የተጠናቀቁ"
+    },
+    "quickActions": {
+      "title": "ፈጣን ተግባራት",
+      "viewAll": "ሁሉንም አገልግሎቶች ተመልከት",
+      "pending": "በጥበቃ ላይ ያሉ አገልግሎቶች",
+      "inProgress": "በሂደት ላይ ያሉ",
+      "completed": "የተጠናቀቁ"
+    },
+    "table": {
+      "title": "የአገልግሎት አፈፃፀም ቅደም ተከተል",
+      "empty": "የተመደበ አገልግሎት የለም",
+      "cols": {
+        "serviceNumber": "የአገልግሎት ቁጥር",
+        "customer": "ደንበኛ",
+        "serviceType": "የአገልግሎት አይነት",
+        "status": "ሁኔታ",
+        "progress": "የሂደት ደረጃ",
+        "actions": "ተግባራት"
+      },
+      "actions": {
+        "view": "ተመልከት",
+        "execute": "አከናውን"
+      }
+    },
+    "status": {
+      "completed": "የተጠናቀቀ",
+      "inProgress": "በሂደት ላይ",
+      "submitted": "ገቢ የተደረገ",
+      "rejected": "ውድቅ የተደረገ",
+      "default": "መደበኛ"
+    }
   }
 }

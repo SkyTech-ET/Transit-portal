@@ -35,35 +35,67 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-[1600px] mx-auto">
-      <h2 className="font-semibold text-[clamp(1.1rem,2.5vw,1.5rem)]">
+    <div className="mx-auto max-w-[1600px] space-y-8 p-4 sm:p-6 lg:p-8">
+      <h2 className="text-[clamp(1.1rem,2.5vw,1.5rem)] font-semibold">
         Dashboard Overview
       </h2>
 
       {/* ================= TOP SUMMARY ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <Card>
           <div className="text-sm font-semibold">Assigned Services</div>
           <div className="mt-3 space-y-2 text-sm">
-            <Row label="Not Started" value={assigned.notStarted} color="text-blue-600" />
-            <Row label="Pending" value={assigned.pending} color="text-yellow-500" />
-            <Row label="Completed" value={assigned.completed} color="text-green-600" />
+            <Row
+              label="Not Started"
+              value={assigned.notStarted}
+              color="text-blue-600"
+            />
+            <Row
+              label="Pending"
+              value={assigned.pending}
+              color="text-yellow-500"
+            />
+            <Row
+              label="Completed"
+              value={assigned.completed}
+              color="text-green-600"
+            />
           </div>
         </Card>
 
-        <StatCard title="Today's Tasks" value={tasks.stagesAwaitingUpdate} hint="Stages awaiting update" color="text-blue-600" />
-        <StatCard title="Service Alerts" value={alerts.flaggedRisks} hint="Blockers or flagged risks" color="text-red-500" />
-        <StatCard title="Message Notifications" value={messages.newMessages} hint="New chats/messages" color="text-blue-600" />
-        <StatCard title="Document Uploads" value={uploads.unAttachedDocs} hint="Unattached required docs" color="text-blue-600" />
+        <StatCard
+          title="Today's Tasks"
+          value={tasks.stagesAwaitingUpdate}
+          hint="Stages awaiting update"
+          color="text-blue-600"
+        />
+        <StatCard
+          title="Service Alerts"
+          value={alerts.flaggedRisks}
+          hint="Blockers or flagged risks"
+          color="text-red-500"
+        />
+        <StatCard
+          title="Message Notifications"
+          value={messages.newMessages}
+          hint="New chats/messages"
+          color="text-blue-600"
+        />
+        <StatCard
+          title="Document Uploads"
+          value={uploads.unAttachedDocs}
+          hint="Unattached required docs"
+          color="text-blue-600"
+        />
       </div>
 
       {/* ================= SERVICE OVERVIEW ================= */}
       <section>
-        <h3 className="font-semibold text-[clamp(1rem,2vw,1.25rem)] mb-3">
+        <h3 className="mb-3 text-[clamp(1rem,2vw,1.25rem)] font-semibold">
           Service Overview
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <ServiceCard
             title="Multimodal Service"
             icon="📦"
@@ -82,8 +114,8 @@ export default function DashboardPage() {
 
       {/* ================= WORK SUMMARY ================= */}
       <section>
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-          <h3 className="font-semibold text-[clamp(1rem,2vw,1.25rem)]">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <h3 className="text-[clamp(1rem,2vw,1.25rem)] font-semibold">
             Work Summary
           </h3>
           {/* <span className="text-blue-600 text-sm font-medium cursor-pointer">
@@ -91,11 +123,27 @@ export default function DashboardPage() {
           </span> */}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-          <SummaryCard label="Total Assigned" value={work.totalAssigned} color="text-blue-600" />
-          <SummaryCard label="Completed" value={work.completed} color="text-green-600" />
-          <SummaryCard label="Time Spent (Today)" value={work.timeSpentToday} color="text-blue-600" />
-          <SummaryCard label="Issues Raised" value={work.issuesRaised} color="text-red-500" />
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <SummaryCard
+            label="Total Assigned"
+            value={work.totalAssigned}
+            color="text-blue-600"
+          />
+          <SummaryCard
+            label="Completed"
+            value={work.completed}
+            color="text-green-600"
+          />
+          <SummaryCard
+            label="Time Spent (Today)"
+            value={work.timeSpentToday}
+            color="text-blue-600"
+          />
+          <SummaryCard
+            label="Issues Raised"
+            value={work.issuesRaised}
+            color="text-red-500"
+          />
         </div>
       </section>
     </div>
@@ -106,15 +154,23 @@ export default function DashboardPage() {
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white p-4 sm:p-5 rounded-xl border border-gray-100 shadow-sm">
+    <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
       {children}
     </div>
   );
 }
 
-function Row({ label, value, color }: { label: string; value: number; color: string }) {
+function Row({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: number;
+  color: string;
+}) {
   return (
-    <div className="flex justify-between items-center gap-2">
+    <div className="flex items-center justify-between gap-2">
       <span className="truncate">{label}</span>
       <span className={`font-semibold ${color}`}>{value}</span>
     </div>
@@ -135,10 +191,12 @@ function StatCard({
   return (
     <Card>
       <div className="text-sm font-semibold">{title}</div>
-      <div className={`mt-2 font-bold text-[clamp(1.1rem,3vw,1.6rem)] ${color}`}>
+      <div
+        className={`mt-2 text-[clamp(1.1rem,3vw,1.6rem)] font-bold ${color}`}
+      >
         {value}
       </div>
-      <div className="text-xs sm:text-sm text-gray-500">{hint}</div>
+      <div className="text-xs text-gray-500 sm:text-sm">{hint}</div>
     </Card>
   );
 }
@@ -153,9 +211,11 @@ function SummaryCard({
   color: string;
 }) {
   return (
-    <div className="bg-white p-4 sm:p-5 rounded-xl border border-gray-100 shadow-sm">
-      <div className="text-xs sm:text-sm text-gray-500">{label}</div>
-      <div className={`mt-1 font-bold text-[clamp(1.1rem,3vw,1.6rem)] ${color}`}>
+    <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+      <div className="text-xs text-gray-500 sm:text-sm">{label}</div>
+      <div
+        className={`mt-1 text-[clamp(1.1rem,3vw,1.6rem)] font-bold ${color}`}
+      >
         {value}
       </div>
     </div>
@@ -191,34 +251,23 @@ function ServiceCard({
   return (
     <div
       onClick={onClick}
-      className={`rounded-xl p-5 sm:p-6 bg-gradient-to-r ${theme.bg} border cursor-pointer`}
+      className={`rounded-xl bg-gradient-to-r p-5 sm:p-6 ${theme.bg} cursor-pointer border`}
     >
       {/* RESPONSIVE TITLE */}
-      <div className={`font-semibold flex items-center gap-2 ${theme.text}`}>
+      <div className={`flex items-center gap-2 font-semibold ${theme.text}`}>
         <span className="text-[clamp(1rem,3vw,1.4rem)]">{icon}</span>
-        <span className="leading-tight text-[clamp(0.95rem,2.8vw,1.25rem)]">
+        <span className="text-[clamp(0.95rem,2.8vw,1.25rem)] leading-tight">
           {title}
         </span>
       </div>
 
-      <p className="text-gray-600 text-sm sm:text-base mt-2">
-         Type specific services
+      <p className="mt-2 text-sm text-gray-600 sm:text-base">
+        Type specific services
       </p>
 
       {/* RESPONSIVE BUTTON TEXT */}
       <button
-        className={`
-          mt-4
-          w-full sm:w-auto
-          min-h-[42px]
-          px-3 sm:px-4
-          py-2
-          text-[clamp(0.75rem,2.5vw,1rem)]
-          leading-tight
-          whitespace-normal break-words text-center
-          rounded-lg text-white shadow transition
-          ${theme.btn}
-        `}
+        className={`mt-4 min-h-[42px] w-full whitespace-normal break-words rounded-lg px-3 py-2 text-center text-[clamp(0.75rem,2.5vw,1rem)] leading-tight text-white shadow transition sm:w-auto sm:px-4 ${theme.btn} `}
       >
         {title}
       </button>

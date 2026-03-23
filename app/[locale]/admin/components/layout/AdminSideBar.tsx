@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react"; // ✅ added
 import { usePathname, useRouter } from "next/navigation";
 import {
   AppstoreOutlined,
@@ -19,16 +20,27 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Menu } from "antd";
+import { useTranslations } from "next-intl";
 
 import Logo from "@/app/[locale]/(client)/components/logo";
 
 interface AdminSideBarProps {
-  onLinkClick?: () => void; // <- add this
+  onLinkClick?: () => void;
 }
 
 export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("AdminSidebar");
+
+  const [mounted, setMounted] = useState(false); // ✅ FIX
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // ✅ prevent hydration mismatch
+  if (!mounted) return null;
 
   return (
     <div
@@ -37,8 +49,7 @@ export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
         top: 0,
         left: 0,
         height: 100,
-        width: 240, // important: fixed width
-        //overflowY: "auto", // scroll sidebar if menu is long
+        width: 240,
         background: "#fff",
         zIndex: 1000,
       }}
@@ -46,12 +57,13 @@ export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
       <div className="ml-4 mt-4 flex">
         <Logo />
       </div>
+
       <Menu
         mode="inline"
         selectedKeys={[pathname]}
         onClick={({ key }) => {
           router.push(key);
-          if (onLinkClick) onLinkClick(); // <- call on mobile link click
+          if (onLinkClick) onLinkClick();
         }}
         style={{
           height: "100vh",
@@ -62,77 +74,55 @@ export default function AdminSideBar({ onLinkClick }: AdminSideBarProps) {
           {
             key: "/admin/dashboard",
             icon: <DashboardOutlined />,
-            label: "Dashboard",
+            label: t("dashboard"),
           },
           {
             key: "/admin/dashboard/stage-overview",
             icon: <AppstoreOutlined />,
-            label: "Stage Overview",
+            label: t("stageoverview"),
           },
           {
             type: "group",
-            label: "Management",
+            label: t("managmentgroup"),
             children: [
               {
                 key: "/admin/employees",
                 icon: <TeamOutlined />,
-                label: "Staff Management",
+                label: t("staffmanagment"),
               },
               {
                 key: "/admin/mot/customers",
                 icon: <UserOutlined />,
-                label: "Customer Management",
+                label: t("customermanagment"),
               },
               {
                 key: "/admin/user",
                 icon: <TeamOutlined />,
-                label: "System Users",
+                label: t("systemusers"),
               },
             ],
           },
-          /* {
-              key: "/admin/caseExecutor/service-list",
-              icon: <MessageOutlined />,
-              label: "Communication",
-            }, */
           {
             key: "/admin/user/profile/id",
             icon: <SettingOutlined />,
-            label: "Profile Settings",
+            label: t("profilesetting"),
           },
           {
             key: "/admin/document",
             icon: <FolderOutlined />,
-            label: "Documents",
+            label: t("documents"),
           },
-
           {
             type: "group",
-            label: "Notifications",
+            label: t("notificationsgroup"),
             children: [
               {
                 key: "/admin/dashboard/notification",
                 icon: <BellOutlined />,
-                label: "Notifications",
+                label: t("notifications"),
               },
             ],
           },
-          /* {
-          type: "group",
-          label: "Analytics",
-          children: [
-            {
-              key: "/case-executor/documents",
-              icon: <FileTextOutlined />,
-              label: "Reports and Analytics",
-            },
-            {
-              key: "/case-executor/documents",
-              icon: <HistoryOutlined />,
-              label: "Activity Log",
-            },
-          ],
-        }, */
         ]}
       />
     </div>

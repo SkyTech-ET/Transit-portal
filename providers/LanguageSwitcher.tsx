@@ -18,7 +18,12 @@ export function LanguageSwitcher() {
   const locale = useLocale();
 
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   //  Switch language
   const switchLanguage = (newLocale: string) => {
@@ -30,10 +35,7 @@ export function LanguageSwitcher() {
       segments.unshift("", newLocale);
     }
 
-    // Save to localStorage
     localStorage.setItem("locale", newLocale);
-
-    //  Save to cookie
     document.cookie = `locale=${newLocale}; path=/; max-age=31536000`;
 
     router.push(segments.join("/"));
@@ -51,19 +53,23 @@ export function LanguageSwitcher() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Load saved language
+  // Load saved language (client only)
   useEffect(() => {
+    if (!mounted) return;
+
     const saved = localStorage.getItem("locale");
     if (saved && saved !== locale) {
       switchLanguage(saved);
     }
-  }, []);
+  }, [mounted]);
 
   const current = languages.find((l) => l.key === locale);
 
+  // ✅ prevent hydration mismatch
+  if (!mounted) return null;
+
   return (
     <div className="relative" ref={ref}>
-      {/* 🌍 Button */}
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 shadow-md transition hover:shadow-lg"
@@ -74,7 +80,6 @@ export function LanguageSwitcher() {
         <span className="text-xs">▾</span>
       </button>
 
-      {/* 🎬 Animated Dropdown */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -90,12 +95,8 @@ export function LanguageSwitcher() {
                 onClick={() => switchLanguage(lang.key)}
                 className="flex cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 transition hover:bg-gray-100"
               >
-                {/* Left side */}
                 <div className="flex items-center gap-3">
-                  {/* 🌍 Flag */}
                   <span className="text-lg">{lang.flag}</span>
-
-                  {/* Label */}
                   <span
                     className={clsx(
                       "text-sm",
@@ -108,7 +109,6 @@ export function LanguageSwitcher() {
                   </span>
                 </div>
 
-                {/* Radio */}
                 <div
                   className={clsx(
                     "flex h-4 w-4 items-center justify-center rounded-full border",

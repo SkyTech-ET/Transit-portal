@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { useTranslations } from "next-intl";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 const COLORS = ["#1E3A8A", "#22C55E"];
 
@@ -18,15 +13,15 @@ export default function ServiceRequestPieChart({
   pending: number;
 }) {
   const completed = Math.max(total - pending, 0);
-
+  const t = useTranslations("AdminSidebar");
   const data = [
     { name: "Pending", value: pending },
     { name: "Completed", value: completed },
   ];
 
   return (
-    <div className="bg-white border border-[#E5E7EB] rounded-xl p-6 shadow-sm">
-      <h3 className="font-semibold mb-4">Service Request Trend</h3>
+    <div className="rounded-xl border border-[rgb(229,231,235)] bg-white p-6 shadow-sm">
+      <h3 className="mb-4 font-semibold">{t("servicerequesttrend")}</h3>
 
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">

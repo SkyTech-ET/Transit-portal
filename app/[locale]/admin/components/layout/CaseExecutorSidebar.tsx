@@ -1,22 +1,24 @@
 "use client";
 
-import { Menu } from "antd";
+import { usePathname, useRouter } from "next/navigation";
 import {
-  DashboardOutlined,
-  UnorderedListOutlined,
-  FolderOutlined,
-  FileTextOutlined,
-  MessageOutlined,
   BellOutlined,
-  SafetyOutlined,
-  UserOutlined,
+  DashboardOutlined,
+  FileTextOutlined,
+  FolderOutlined,
+  MessageOutlined,
   ProfileOutlined,
+  SafetyOutlined,
+  UnorderedListOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
-import { useRouter, usePathname } from "next/navigation";
+import { Menu } from "antd";
+import { useTranslations } from "next-intl";
 
 export default function CaseExecutorSidebar() {
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("CaseExecuterSidebar");
 
   return (
     <Menu
@@ -32,48 +34,47 @@ export default function CaseExecutorSidebar() {
         {
           key: "/admin/caseExecutor/dashboard",
           icon: <DashboardOutlined />,
-          label: "Dashboard",
+          label: t("dashboard"),
         },
 
         {
           type: "group",
-          label: "Services",
+          label: t("groups.services"),
           children: [
             {
               key: "/admin/caseExecutor/service-list",
               icon: <UnorderedListOutlined />,
-              label: "Service List",
+              label: t("items.serviceList"),
             },
             {
               key: "/admin/caseExecutor/service-categories",
               icon: <FolderOutlined />,
-              label: "Service Categories",
+              label: t("items.serviceCategories"),
             },
           ],
         },
 
         {
           type: "group",
-          label: "Documents",
+          label: t("groups.documents"),
           children: [
             {
               key: "/admin/caseExecutor/document",
               icon: <FileTextOutlined />,
-              label: "Document Center",
+              label: t("items.documentCenter"),
             },
           ],
         },
 
         {
           type: "group",
-          label: "Communication",
+          label: t("groups.communication"),
           children: [
             {
               key: "/case-executor/messages",
               icon: <MessageOutlined />,
-              label: "Messaging",
+              label: t("items.messaging"),
             },
-           
           ],
         },
 
@@ -91,12 +92,12 @@ export default function CaseExecutorSidebar() {
 
         {
           type: "group",
-          label: "Account",
+          label: t("groups.account"),
           children: [
             {
               key: "/admin/user/profile/id",
               icon: <UserOutlined />,
-              label: "Profile",
+              label: t("items.profile"),
             },
             /* {
               key: "/case-executor/activity-log",
